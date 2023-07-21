@@ -1,8 +1,12 @@
-import SideBar from "@/app/components/sideBar/SideBar"
-import TopBar from "@/app/components/topBar/TopBar"
+import SideBar from "@/app/components/sideBar/SideBar";
+import TopBar from "@/app/components/topBar/TopBar";
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
-  return (
+export default function Post({
+  params
+}: {
+  params: { id: string }
+}) {
+  return(
     <div>
       <TopBar />
       <div className="container 2xl mx-auto grid grid-cols-12">
@@ -10,7 +14,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SideBar />
         </div>
         <div className="col-span-10">
-          {children}
+         {params.id} Post Page
         </div>
       </div>
     </div>
