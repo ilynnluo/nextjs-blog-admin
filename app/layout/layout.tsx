@@ -14,7 +14,9 @@ export default function MainLayout({
           <SideBar />
         </div>
         <div className="col-span-10">
-          {children}
+          <div className="container mx-auto p-4">
+            {children}
+          </div>
         </div>
       </div>
     </div>
