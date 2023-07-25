@@ -1,10 +1,32 @@
+'use client'
+import React, { useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
 
 export default function CreatePost() {
+  const QuillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline','strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'image'],
+      ['clean']
+    ],
+  }
+  const QuillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image'
+  ]
+  const [editorValue, setEditorValue] = useState('');
   return (
     <MainLayout>
-      <div className="py-1">
+      <div>
+        {/* page title */}
         <h2 className="text-2xl font-bold">Create</h2>
+        {/* main content */}
         <div className="max-w-3xl">
           <div className="grid grid-cols-1">
             <div className="mt-8 px-4 py-2 border-l-4 border-indigo-500">
@@ -190,6 +212,16 @@ export default function CreatePost() {
             {/* main content */}
             <div className="mt-12 px-4 py-2 border-l-4 border-indigo-500">
               Content
+            </div>
+            <div className='mt-8 pb-8'>
+              <ReactQuill
+                className='mb-8 h-40'
+                theme='snow'
+                value={editorValue}
+                onChange={setEditorValue}
+                modules={QuillModules}
+                formats={QuillFormats}
+              />
             </div>
           </div>
         </div>
