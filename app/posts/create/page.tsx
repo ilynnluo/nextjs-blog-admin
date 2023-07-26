@@ -223,6 +223,14 @@ export default function CreatePost() {
                 formats={QuillFormats}
               />
             </div>
+            <div className="flex justify-end mt-12">
+              <button className="py-2 px-4 bg-white text-indigo-500 rounded border border-indigo-500">
+                Save
+              </button>
+              <button className="py-2 px-4 bg-indigo-500 text-white rounded">
+                Publish
+              </button>
+            </div>
           </div>
         </div>
       </div>
