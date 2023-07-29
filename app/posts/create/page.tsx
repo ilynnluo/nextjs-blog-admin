@@ -132,7 +132,7 @@ export default function CreatePost() {
                         className="form-input mt-1 p-1 w-48 block border border-slate-300
                           focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                             placeholder:text-sm"
-                        placeholder="input a number"
+                        placeholder="number only"
                       />
                     </label>
                     <fieldset className="block ml-8">
