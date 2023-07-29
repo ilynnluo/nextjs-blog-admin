@@ -10,7 +10,9 @@ export default function SideBar() {
           </Link>
         </li>
         <li className="mb-2">
-          Posts
+          <Link href='/posts'>
+            Posts
+          </Link>
         </li>
       </ul>
     </div>
