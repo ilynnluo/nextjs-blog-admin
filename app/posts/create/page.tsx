@@ -3,6 +3,9 @@ import React, { ChangeEvent, MouseEvent, useState, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
+import { JsxElement } from 'typescript';
+
+var canada = require('canada')
 
 enum TimeUnit {
   hours = 'hours',
@@ -10,6 +13,14 @@ enum TimeUnit {
 }
 
 export default function CreatePost() {
+  const regionsData = canada.regions
+  const regions = Object.values(regionsData)
+  // console.log('regions: ', regions)
+  const cities = canada.cities.map((cityData: string[]) => ({
+    city: cityData[0],
+    province: cityData[1]
+  }))
+  console.log('cities: ', cities)
   const defaultTab = useRef<HTMLButtonElement>(null)
   const [tab, setTab] = useState('basic')
   const handleTab = (e: MouseEvent<HTMLButtonElement>) => setTab(e.currentTarget.value)
@@ -51,9 +62,8 @@ export default function CreatePost() {
   const handleAreaTag = (id: number, checked: boolean) => {
     const tags = [...areaTags]
     const clickedTag = tags.find((t) => t.id === id)
-    if(clickedTag !== undefined) clickedTag.checked = checked
+    if (clickedTag !== undefined) clickedTag.checked = checked
     setAreaTags(tags)
-    console.log('after: ', areaTags)
   }
   const [departPro, setDepartPro] = useState('')
   const handleDepartPro = () => { }
@@ -203,9 +213,7 @@ export default function CreatePost() {
                         onChange={handleDepartPro}
                         className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
                           focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                        <option value=''>Select a Province</option>
-                        <option value='on'>Ontario</option>
-                        <option value='ns'>Nova Scotia</option>
+                        {/* <option value=''>Select a Province</option> */}
                       </select>
                     </label>
                     <label className="block">
