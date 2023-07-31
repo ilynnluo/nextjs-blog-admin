@@ -1,5 +1,5 @@
 'use client'
-import React, { ChangeEvent, MouseEvent, useState, useRef } from 'react';
+import React, { ChangeEvent, MouseEvent, useState, useRef, FormEvent, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
@@ -12,15 +12,18 @@ enum TimeUnit {
   days = 'days'
 }
 
+interface CityProp {
+  province: string
+  city: string
+}
+
 export default function CreatePost() {
   const regionsData = canada.regions
-  const regions = Object.values(regionsData)
-  // console.log('regions: ', regions)
+  const regions = Object.keys(regionsData) as string[]
   const cities = canada.cities.map((cityData: string[]) => ({
-    city: cityData[0],
-    province: cityData[1]
+    province: cityData[1],
+    city: cityData[0]
   }))
-  console.log('cities: ', cities)
   const defaultTab = useRef<HTMLButtonElement>(null)
   const [tab, setTab] = useState('basic')
   const handleTab = (e: MouseEvent<HTMLButtonElement>) => setTab(e.currentTarget.value)
@@ -66,9 +69,14 @@ export default function CreatePost() {
     setAreaTags(tags)
   }
   const [departPro, setDepartPro] = useState('')
-  const handleDepartPro = () => { }
+  const [departCityList, setDepartCityList] = useState<CityProp[]>([])
+  const handleDepartPro = (e: ChangeEvent<HTMLSelectElement>) => {
+    setDepartPro(e.currentTarget.value)
+    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
+    setDepartCityList(filterCityList)
+  }
   const [departCity, setDepartCity] = useState('')
-  const handleDepartCity = () => { }
+  const handleDepartCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
   const [destination, setDestination] = useState({
     id: '',
     destiPro: '',
@@ -212,8 +220,14 @@ export default function CreatePost() {
                         value={departPro}
                         onChange={handleDepartPro}
                         className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
-                          focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                        {/* <option value=''>Select a Province</option> */}
+                          focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value=''>Select a Province</option>
+                        {
+                          regions.map((r, index) => <option
+                            key={`${index}+${r}`}
+                            value={r}>
+                            {r}</option>)
+                        }
                       </select>
                     </label>
                     <label className="block">
@@ -224,8 +238,13 @@ export default function CreatePost() {
                         onChange={handleDepartCity}
                         className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
                           focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                        <option value='toronto'>Toronto</option>
-                        <option value='aurora'>Aurora</option>
+                        {
+                          departCityList.map((item: { province: string, city: string }, index: number) => <option
+                            key={`${index}+${item.province}+${item.city}`}
+                            value={item.city}>
+                            {item.city}
+                          </option>)
+                        }
                       </select>
                     </label>
                   </div>
