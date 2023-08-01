@@ -3,7 +3,7 @@ import React, { ChangeEvent, MouseEvent, useState, useRef, FormEvent, useEffect 
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
-import { JsxElement } from 'typescript';
+import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
 
 var canada = require('canada')
 
@@ -12,7 +12,7 @@ enum TimeUnit {
   days = 'days'
 }
 
-interface CityProp {
+export interface CityProp {
   province: string
   city: string
 }
@@ -69,27 +69,34 @@ export default function CreatePost() {
     setAreaTags(tags)
   }
   const [departPro, setDepartPro] = useState('')
-  const [departCityList, setDepartCityList] = useState<CityProp[]>([])
-  const handleDepartPro = (e: ChangeEvent<HTMLSelectElement>) => {
+  const [cityList, setCityList] = useState<CityProp[]>([])
+  const handleProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setDepartPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
-    setDepartCityList(filterCityList)
+    setCityList(filterCityList)
   }
   const [departCity, setDepartCity] = useState('')
-  const handleDepartCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
-  const [destination, setDestination] = useState({
-    id: '',
-    destiPro: '',
-    destiCity: '',
-    spot: {
-      id: '',
-      spotName: '',
-      spotFeature: [],
-      spotActivities: []
-    }
-  })
-  const handleDestiPro = () => { }
-  const handleDestiCity = () => { }
+  const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
+  // const [destination, setDestination] = useState({
+  //   id: '',
+  //   destiPro: '',
+  //   destiCity: '',
+  //   spot: {
+  //     id: '',
+  //     spotName: '',
+  //     spotFeature: [],
+  //     spotActivities: []
+  //   }
+  // })
+  const [spotName, setSpotName] = useState('')
+  const [destPro, setDestPro] = useState('')
+  const handleDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
+    setDestPro(e.currentTarget.value)
+    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
+    setCityList(filterCityList)
+  }
+  const handleDestCity = (e: ChangeEvent<HTMLSelectElement>) => setDestCity(e.currentTarget.value)
+  const [destCity, setDestCity] = useState('')
   const handleSpotName = () => { }
   const handleSpotFeature = () => { }
   const handleSpotActivity = () => { }
@@ -213,40 +220,14 @@ export default function CreatePost() {
                     Departure
                   </div>
                   <div className="flex mt-8 pl-4">
-                    <label className="block mr-8">
-                      <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                        Province</span>
-                      <select
-                        value={departPro}
-                        onChange={handleDepartPro}
-                        className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
-                          focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value=''>Select a Province</option>
-                        {
-                          regions.map((r, index) => <option
-                            key={`${index}+${r}`}
-                            value={r}>
-                            {r}</option>)
-                        }
-                      </select>
-                    </label>
-                    <label className="block">
-                      <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                        City</span>
-                      <select
-                        value={departCity}
-                        onChange={handleDepartCity}
-                        className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
-                          focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                        {
-                          departCityList.map((item: { province: string, city: string }, index: number) => <option
-                            key={`${index}+${item.province}+${item.city}`}
-                            value={item.city}>
-                            {item.city}
-                          </option>)
-                        }
-                      </select>
-                    </label>
+                    <ProvinceCity
+                      provinceList={regions}
+                      province={departPro}
+                      cityList={cityList}
+                      city={departCity}
+                      handleProvince={handleProvince}
+                      handleCity={handleCity}
+                    />
                   </div>
                 </div>
                 {/* Desitinations */}
@@ -254,122 +235,114 @@ export default function CreatePost() {
                   <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
                     Destinations
                   </div>
-                  {/* select desitination information */}
-                  <div className='pl-4'>
-                    {/* province, city */}
-                    <div className="flex mt-8">
-                      <label className="block mr-8">
-                        <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                          Province</span>
-                        <select
-                          value={destination.destiPro}
-                          onChange={handleDestiPro}
-                          className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
-                            focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                          <option value=''>Select a Province</option>
-                          <option value='on'>Ontario</option>
-                          <option value='ns'>Nova Scotia</option>
-                        </select>
-                      </label>
-                      <label className="block">
-                        <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                          City</span>
-                        <select
-                          value={destination.destiCity}
-                          onChange={handleDestiCity}
-                          className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
-                            focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
-                          <option>Toronto</option>
-                          <option>Aurora</option>
-                        </select>
-                      </label>
-                    </div>
-                    {/* spot information */}
-                    <div className='px-4'>
-                      {/* spot name */}
-                      <label className="block mt-8">
-                        <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                          Spot Name</span>
-                        <input
-                          type="text"
-                          value={destination.spot.spotName}
-                          onChange={handleSpotName}
-                          className="block mt-1 p-1 w-full border border-slate-300 
-                          focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50
-                            placeholder:text-sm"
-                          placeholder="spot name"
-                        />
-                      </label>
-                      {/* spot features */}
-                      <div className="mt-8">
-                        <fieldset className="block">
-                          <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                            Spot Features</legend>
-                          <div className="flex mt-1">
-                            <div className="mr-8">
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  value='cafe'
-                                  onClick={handleSpotFeature}
-                                  className="form-checkbox" />
-                                <span className="ml-2">Cafe</span>
-                              </label>
-                            </div>
-                            <div>
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  value='park'
-                                  onClick={handleSpotFeature}
-                                  className="form-checkbox" />
-                                <span className="ml-2">Park</span>
-                              </label>
-                            </div>
-                          </div>
-                        </fieldset>
-                      </div>
-                      {/* spot activities */}
-                      <div className="mt-8">
-                        <fieldset className="block">
-                          <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                            Activities</legend>
-                          <div className="flex mt-1">
-                            <div className="mr-8">
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  value='hiking'
-                                  onClick={handleSpotActivity}
-                                  className="form-checkbox" />
-                                <span className="ml-2">Hiking</span>
-                              </label>
-                            </div>
-                            <div>
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  value='swimming'
-                                  onClick={handleSpotActivity}
-                                  className="form-checkbox" />
-                                <span className="ml-2">Swimming</span>
-                              </label>
-                            </div>
-                          </div>
-                        </fieldset>
-                      </div>
-                    </div>
-                    <div className="mt-8">
-                      <button className="py-2 px-4 bg-indigo-500 text-white rounded">
-                        Add Spot
-                      </button>
-                    </div>
-                  </div>
                   {/* add desitination button */}
                   <div className="mt-8">
                     <button className="py-2 px-4 bg-indigo-500 text-white rounded">
                       Add Desitination
                     </button>
+                  </div>
+                  <div className="flex w-screen h-full z-50 fixed top-0 right-0 bg-slate-500/50">
+                    <div className="m-auto items-center w-1/2 h-auto bg-white rounded overflow-auto">
+                      {/* select desitination information */}
+                      <div className='px-6 py-4'>
+                        <h2 className='py-4 text-xl bold'>Add spot</h2>
+                        {/* spot information */}
+                        <div className='mt-4'>
+                          {/* spot name */}
+                          <label className="block">
+                            <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                              Spot Name</span>
+                            <input
+                              type="text"
+                              value={spotName}
+                              onChange={handleSpotName}
+                              className="block mt-1 p-1 w-full border border-slate-300 
+                                focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50
+                                  placeholder:text-sm"
+                              placeholder="spot name"
+                            />
+                          </label>
+                          {/* spot location */}
+                          <div className="flex mt-8">
+                            <ProvinceCity
+                              provinceList={regions}
+                              province={destPro}
+                              cityList={cityList}
+                              city={destCity}
+                              handleProvince={handleDestProvince}
+                              handleCity={handleDestCity}
+                            />
+                          </div>
+                          {/* spot features */}
+                          <div className="mt-8">
+                            <fieldset className="block">
+                              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Spot Features</legend>
+                              <div className="flex mt-1">
+                                <div className="mr-8">
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value='cafe'
+                                      onClick={handleSpotFeature}
+                                      className="form-checkbox" />
+                                    <span className="ml-2">Cafe</span>
+                                  </label>
+                                </div>
+                                <div>
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value='park'
+                                      onClick={handleSpotFeature}
+                                      className="form-checkbox" />
+                                    <span className="ml-2">Park</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </fieldset>
+                          </div>
+                          {/* spot activities */}
+                          <div className="mt-8">
+                            <fieldset className="block">
+                              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Activities</legend>
+                              <div className="flex mt-1">
+                                <div className="mr-8">
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value='hiking'
+                                      onClick={handleSpotActivity}
+                                      className="form-checkbox" />
+                                    <span className="ml-2">Hiking</span>
+                                  </label>
+                                </div>
+                                <div>
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value='swimming'
+                                      onClick={handleSpotActivity}
+                                      className="form-checkbox" />
+                                    <span className="ml-2">Swimming</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </fieldset>
+                          </div>
+                        </div>
+                        {/* add button */}
+                        <div className="flex justify-between mt-8">
+                          <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500">
+                            Cancel
+                          </button>
+                          <button className="py-2 px-4 bg-indigo-500 text-white rounded">
+                            Add Spot
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
