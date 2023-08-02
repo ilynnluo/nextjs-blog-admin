@@ -4,7 +4,6 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
 import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
-import { features } from 'process';
 
 var canada = require('canada')
 
@@ -115,9 +114,9 @@ export default function CreatePost() {
   ]
   const [features, setFeatures] = useState(defaultFeatures)
   const [checkedFeatures, setCheckedFeatures] = useState<string[]>([])
-  const handleSpotFeature = (id: number, checked: boolean) => {
+  const handleSpotFeature = (name: string, checked: boolean) => {
     const spotFeatures = [...features]
-    const clickedFeature = spotFeatures.find((t) => t.id === id)
+    const clickedFeature = spotFeatures.find((t) => t.name === name)
     if (clickedFeature !== undefined) clickedFeature.checked = checked
     const checkedFeaturesArray = spotFeatures.filter((f) => f.checked === true)
     let checking: string[] = []
@@ -141,9 +140,9 @@ export default function CreatePost() {
   ]
   const [activities, setActivities] = useState(defaultActivities)
   const [checkedActivities, setCheckdActivities] = useState<string[]>([])
-  const handleSpotActivity = (id: number, checked: boolean) => {
+  const handleSpotActivity = (name: string, checked: boolean) => {
     const spotActivities = [...activities]
-    const clickedActivity = spotActivities.find((t) => t.id === id)
+    const clickedActivity = spotActivities.find((t) => t.name === name)
     if (clickedActivity !== undefined) clickedActivity.checked = checked
     const checkedActivitiesArray = spotActivities.filter((a) => a.checked === true)
     let checking: string[] = []
@@ -174,6 +173,20 @@ export default function CreatePost() {
     const selecting = destinations.find((d) => d.spotName === name)
     setSelectedDest(selecting)
   }
+  const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, name: string | undefined) => {
+    const copyDestinations = [...destinations]
+    const updatingDestinations = copyDestinations.find((d) => d.spotName === name)
+    if(updatingDestinations !== undefined) {
+      updatingDestinations.spotName = spotName
+      updatingDestinations.spotProvince = destPro
+      updatingDestinations.spotCity = destCity
+      updatingDestinations.spotActivities = checkedActivities
+      updatingDestinations.spotFeatures = checkedFeatures
+    }
+    setDesitinations(copyDestinations)
+    setShowEditDest(false)
+  }
+  const handleCloseEditDestination = () => setShowEditDest(false)
 
   return (
     <MainLayout>
@@ -387,7 +400,7 @@ export default function CreatePost() {
                                         <input
                                           type="checkbox"
                                           value={f.name}
-                                          onChange={e => handleSpotFeature(f.id, e.target.checked)}
+                                          onChange={e => handleSpotFeature(f.name, e.target.checked)}
                                           className="form-checkbox" />
                                         <span className="ml-2">{f.name}</span>
                                       </label>)
@@ -410,7 +423,7 @@ export default function CreatePost() {
                                         <input
                                           type="checkbox"
                                           value='hiking'
-                                          onChange={(e) => handleSpotActivity(a.id, e.target.checked)}
+                                          onChange={(e) => handleSpotActivity(a.name, e.target.checked)}
                                           className="form-checkbox" />
                                         <span className="ml-2">{a.name}</span>
                                       </label>)
@@ -442,7 +455,7 @@ export default function CreatePost() {
                           {/* add destination dialog header */}
                           <div className="flex justify-between items-center w-full">
                             <h2 className='text-xl bold'>Add spot</h2>
-                            <div className="w-6 h-6 cursor-pointer" onClick={handleShowDestination}>
+                            <div className="w-6 h-6 cursor-pointer" onClick={handleCloseEditDestination}>
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} className="w-6 h-6 stroke-slate-600">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                               </svg>
@@ -456,7 +469,7 @@ export default function CreatePost() {
                                 Spot Name</span>
                               <input
                                 type="text"
-                                value={selectedDest?.spotName}
+                                defaultValue={selectedDest?.spotName}
                                 onChange={handleSpotName}
                                 className="block mt-1 p-1 w-full border border-slate-300 
                                 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
@@ -489,7 +502,8 @@ export default function CreatePost() {
                                         <input
                                           type="checkbox"
                                           value={f.name}
-                                          onChange={e => handleSpotFeature(f.id, e.target.checked)}
+                                          checked={f.checked}
+                                          onChange={e => handleSpotFeature(f.name, e.target.checked)}
                                           className="form-checkbox" />
                                         <span className="ml-2">{f.name}</span>
                                       </label>)
@@ -512,7 +526,8 @@ export default function CreatePost() {
                                         <input
                                           type="checkbox"
                                           value='hiking'
-                                          onChange={(e) => handleSpotActivity(a.id, e.target.checked)}
+                                          checked={a.checked}
+                                          onChange={(e) => handleSpotActivity(a.name, e.target.checked)}
                                           className="form-checkbox" />
                                         <span className="ml-2">{a.name}</span>
                                       </label>)
@@ -522,13 +537,13 @@ export default function CreatePost() {
                               </fieldset>
                             </div>
                           </div>
-                          {/* submit add button */}
+                          {/* submit update button */}
                           <div className="flex justify-between mt-8">
                             <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleShowDestination}>
-                              Cancel
+                              Delete
                             </button>
-                            <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleAddDestination}>
-                              Add Spot
+                            <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={e => handleUpdateDestination(e, selectedDest?.spotName)}>
+                              Update
                             </button>
                           </div>
                         </div>
