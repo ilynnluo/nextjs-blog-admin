@@ -1,7 +1,6 @@
 import React, { useState, ChangeEvent } from "react"
 import ProvinceCity from "../provinceCity/ProvinceCity"
-import { CityProp } from "@/app/posts/create/page"
-import { DestinationProp } from "@/app/posts/create/page"
+import { DestinationProp, CityProp, ActivityProp, FeatureProp } from "@/app/posts/create/page"
 
 var canada = require('canada')
 
@@ -15,6 +14,13 @@ export default function CreateDestination(
     createDestCity: string
     handleCreateDestCity: (e: ChangeEvent<HTMLSelectElement>) => void
     createCityList: CityProp[]
+    createFeatures: FeatureProp[]
+    checkedCreateFeatures: string[]
+    handleCreateFeature: (name: string, checked: boolean) => void
+    createActivities: ActivityProp[]
+    checkedCreateActivities: string[]
+    handleCreateActivity: (name: string, checked: boolean) => void
+    handleCreateDestination: () => void
   }
 ) {
   const regionsData = canada.regions
@@ -32,6 +38,11 @@ export default function CreateDestination(
   const createCityList = props.createCityList
   const createDestCity = props.createDestCity
   const handleCreateDestCity = props.handleCreateDestCity
+  const checkedCreateFeatures = props.checkedCreateFeatures
+  const handleCreateFeature = props.handleCreateFeature
+  const checkedCreateActivities = props.checkedCreateActivities
+  const handleCreateActivity = props.handleCreateActivity
+  const handleCreateDestination = props.handleCreateDestination
 
   const [destPro, setDestPro] = useState('')
   const [destCity, setDestCity] = useState('')
@@ -98,8 +109,8 @@ export default function CreateDestination(
     handleCloseDestination()
     destinations.push({
       spotName: createSpotName,
-      spotFeatures: checkedFeatures,
-      spotActivities: checkedActivities,
+      spotFeatures: checkedCreateFeatures,
+      spotActivities: checkedCreateActivities,
       spotProvince: destPro,
       spotCity: destCity
     })
@@ -159,7 +170,7 @@ export default function CreateDestination(
                     <input
                       type="checkbox"
                       value={f.name}
-                      onChange={e => handleSpotFeature(f.name, e.target.checked)}
+                      onChange={e => handleCreateFeature(f.name, e.target.checked)}
                       className="form-checkbox" />
                     <span className="ml-2">{f.name}</span>
                   </label>)
@@ -182,7 +193,7 @@ export default function CreateDestination(
                     <input
                       type="checkbox"
                       value='hiking'
-                      onChange={(e) => handleSpotActivity(a.name, e.target.checked)}
+                      onChange={(e) => handleCreateActivity(a.name, e.target.checked)}
                       className="form-checkbox" />
                     <span className="ml-2">{a.name}</span>
                   </label>)
@@ -197,7 +208,7 @@ export default function CreateDestination(
         <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleCloseDestination}>
           Cancel
         </button>
-        <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleAddDestination}>
+        <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleCreateDestination}>
           Add Spot
         </button>
       </div>

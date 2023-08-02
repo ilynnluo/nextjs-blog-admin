@@ -26,6 +26,18 @@ export interface DestinationProp {
   spotCity: string
 }
 
+export interface FeatureProp {
+  id: number
+  name: string
+  checked: boolean
+}
+
+export interface ActivityProp {
+  id: number
+  name: string
+  checked: boolean
+}
+
 export default function CreatePost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
@@ -89,32 +101,7 @@ export default function CreatePost() {
   }
   const [departCity, setDepartCity] = useState('')
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
-  // create destination state management
-  const [showCreateDest, setShowCreateDest] = useState(false)
-  const handleShowDestination = () => setShowCreateDest(true)
-  const handleCloseDestination = () => setShowCreateDest(false)
-  const [createSpotName, setCreateSpotName] = useState('')
-  const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => setCreateSpotName(e.currentTarget.value)
-  const [createDestPro, setCreateDestPro] = useState('')
-  const handleCreateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
-    setCreateDestPro(e.currentTarget.value)
-    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
-    setCreateCityList(filterCityList)
-  }
-  const [createCityList, setCreateCityList] = useState<CityProp[]>([])
-  const [createDestCity, setCreateDestCity] = useState('')
-  const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
 
-  const [spotName, setSpotName] = useState('')
-  const [destPro, setDestPro] = useState('')
-  const handleDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
-    setDestPro(e.currentTarget.value)
-    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
-    setCityList(filterCityList)
-  }
-  const handleDestCity = (e: ChangeEvent<HTMLSelectElement>) => setDestCity(e.currentTarget.value)
-  const [destCity, setDestCity] = useState('')
-  const handleSpotName = (e: ChangeEvent<HTMLInputElement>) => setSpotName(e.currentTarget.value)
   const defaultFeatures = [
     {
       id: 1,
@@ -127,6 +114,91 @@ export default function CreatePost() {
       checked: false
     }
   ]
+  const defaultActivities = [
+    {
+      id: 1,
+      name: 'Hiking',
+      checked: false
+    },
+    {
+      id: 2,
+      name: 'Swimming',
+      checked: false
+    }
+  ]
+  // create destination state management
+  const [showCreateDest, setShowCreateDest] = useState(false)
+  const handleShowDestination = () => setShowCreateDest(true)
+  const handleCloseDestination = () => {
+    setShowCreateDest(false)
+    setCreateSpotName('')
+    setCreateDestPro('')
+    setCreateDestCity('')
+    setCheckedCreateFeatures([])
+    setCheckdCreateActivities([])
+  }
+  const [createSpotName, setCreateSpotName] = useState('')
+  const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => setCreateSpotName(e.currentTarget.value)
+  const [createDestPro, setCreateDestPro] = useState('')
+  const handleCreateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
+    setCreateDestPro(e.currentTarget.value)
+    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
+    setCreateCityList(filterCityList)
+  }
+  const [createCityList, setCreateCityList] = useState<CityProp[]>([])
+  const [createDestCity, setCreateDestCity] = useState('')
+  const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
+  const [createFeatures, setCreateFeatures] = useState(defaultFeatures)
+  const [checkedCreateFeatures, setCheckedCreateFeatures] = useState<string[]>([])
+  const handleCreateFeature = (name: string, checked: boolean) => {
+    const copyFeatures = [...features]
+    const clickedFeature = copyFeatures.find((t) => t.name === name)
+    if (clickedFeature !== undefined) clickedFeature.checked = checked
+    const checkedFeaturesArray = copyFeatures.filter((f) => f.checked === true)
+    let checking: string[] = []
+    checkedFeaturesArray.forEach((f) => {
+      if (f.checked === true) checking.push(f.name)
+    })
+    setCheckedCreateFeatures(checking)
+    setCreateFeatures(copyFeatures)
+  }
+  const [createActivities, setCreateActivities] = useState(defaultActivities)
+  const [checkedCreateActivities, setCheckdCreateActivities] = useState<string[]>([])
+  const handleCreateActivity = (name: string, checked: boolean) => {
+    const copyActivities = [...activities]
+    const clickedActivity = copyActivities.find((t) => t.name === name)
+    if (clickedActivity !== undefined) clickedActivity.checked = checked
+    const checkedActivitiesArray = copyActivities.filter((a) => a.checked === true)
+    let checking: string[] = []
+    checkedActivitiesArray.forEach((a) => {
+      if (a.checked === true) checking.push(a.name)
+    })
+    setCheckdCreateActivities(checking)
+    setCreateActivities(copyActivities)
+  }
+  const handleCreateDestination = () => {
+    setShowCreateDest(false)
+    destinations.push({
+      spotName: createSpotName,
+      spotFeatures: checkedCreateFeatures,
+      spotActivities: checkedCreateActivities,
+      spotProvince: createDestPro,
+      spotCity: createDestCity
+    })
+  }
+  
+
+  const [spotName, setSpotName] = useState('')
+  const [destPro, setDestPro] = useState('')
+  const handleDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
+    setDestPro(e.currentTarget.value)
+    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
+    setCityList(filterCityList)
+  }
+  const handleDestCity = (e: ChangeEvent<HTMLSelectElement>) => setDestCity(e.currentTarget.value)
+  const [destCity, setDestCity] = useState('')
+  const handleSpotName = (e: ChangeEvent<HTMLInputElement>) => setSpotName(e.currentTarget.value)
+  
   const [features, setFeatures] = useState(defaultFeatures)
   const [checkedFeatures, setCheckedFeatures] = useState<string[]>([])
   const handleSpotFeature = (name: string, checked: boolean) => {
@@ -141,18 +213,8 @@ export default function CreatePost() {
     setCheckedFeatures(checking)
     setFeatures(spotFeatures)
   }
-  const defaultActivities = [
-    {
-      id: 1,
-      name: 'Hiking',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Swimming',
-      checked: false
-    }
-  ]
+  
+  
   const [activities, setActivities] = useState(defaultActivities)
   const [checkedActivities, setCheckdActivities] = useState<string[]>([])
   const handleSpotActivity = (name: string, checked: boolean) => {
@@ -369,6 +431,13 @@ export default function CreatePost() {
                       createDestCity={createDestCity}
                       handleCreateDestCity={handleCreateDestCity}
                       createCityList={createCityList}
+                      createFeatures={createFeatures}
+                      checkedCreateFeatures={checkedCreateFeatures}
+                      handleCreateFeature={handleCreateFeature}
+                      createActivities={createActivities}
+                      checkedCreateActivities={checkedCreateActivities}
+                      handleCreateActivity={handleCreateActivity}
+                      handleCreateDestination={handleCreateDestination}
                     />
                   }
                   
