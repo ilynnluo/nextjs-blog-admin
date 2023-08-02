@@ -133,6 +133,7 @@ export default function CreatePost() {
     setShowCreateDest(false)
     setCreateSpotName('')
     setCreateDestPro('')
+    setCreateCityList([])
     setCreateDestCity('')
     setCheckedCreateFeatures([])
     setCheckdCreateActivities([])
