@@ -18,6 +18,14 @@ export interface CityProp {
   city: string
 }
 
+interface DestinationProp {
+  spotName: string
+  spotFeatures: string[]
+  spotActivities: string[]
+  spotProvince: string
+  spotCity: string
+}
+
 export default function CreatePost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
@@ -71,10 +79,7 @@ export default function CreatePost() {
     const clickedTag = tags.find((t) => t.id === id)
     if (clickedTag !== undefined) clickedTag.checked = checked
     const checkedTagsArray = tags.filter((t) => t.checked === true)
-    checkedTagsArray.forEach((t) => {
-      if(t.checked) checkedTags.push(t.name)
-    })
-    console.log('Checking Tags: ', checkedTags)
+    checkedTagsArray.forEach((t) => { if (t.checked) checkedTags.push(t.name) })
     setAreaTags(tags)
   }
   const [departPro, setDepartPro] = useState('')
@@ -109,10 +114,17 @@ export default function CreatePost() {
     }
   ]
   const [features, setFeatures] = useState(defaultFeatures)
+  const [checkedFeatures, setCheckedFeatures] = useState<string[]>([])
   const handleSpotFeature = (id: number, checked: boolean) => {
     const spotFeatures = [...features]
     const clickedFeature = spotFeatures.find((t) => t.id === id)
     if (clickedFeature !== undefined) clickedFeature.checked = checked
+    const checkedFeaturesArray = spotFeatures.filter((f) => f.checked === true)
+    let checking: string[] = []
+    checkedFeaturesArray.forEach((f) => {
+      if (f.checked === true) checking.push(f.name)
+    })
+    setCheckedFeatures(checking)
     setFeatures(spotFeatures)
   }
   const defaultActivities = [
@@ -128,17 +140,39 @@ export default function CreatePost() {
     }
   ]
   const [activities, setActivities] = useState(defaultActivities)
+  const [checkedActivities, setCheckdActivities] = useState<string[]>([])
   const handleSpotActivity = (id: number, checked: boolean) => {
     const spotActivities = [...activities]
     const clickedActivity = spotActivities.find((t) => t.id === id)
     if (clickedActivity !== undefined) clickedActivity.checked = checked
+    const checkedActivitiesArray = spotActivities.filter((a) => a.checked === true)
+    let checking: string[] = []
+    checkedActivitiesArray.forEach((a) => {
+      if (a.checked === true) checking.push(a.name)
+    })
+    setCheckdActivities(checking)
     setActivities(spotActivities)
   }
   const [showAddDest, setShowAddDest] = useState(false)
   const handleShowDestination = () => setShowAddDest(!showAddDest)
-  const [destinations, setDesitinations] = useState([])
+  const [showEditDest, setShowEditDest] = useState(false)
+  // default value should get from API, rather than [], update it later
+  const [destinations, setDesitinations] = useState<DestinationProp[]>([])
   const handleAddDestination = () => {
     setShowAddDest(false)
+    destinations.push({
+      spotName: spotName,
+      spotFeatures: checkedFeatures,
+      spotActivities: checkedActivities,
+      spotProvince: destPro,
+      spotCity: destCity
+    })
+  }
+  const [selectedDest, setSelectedDest] = useState<DestinationProp | undefined>(undefined)
+  const handleShowEditDestination = (e: MouseEvent<HTMLButtonElement>, name: string) => {
+    setShowEditDest(true)
+    const selecting = destinations.find((d) => d.spotName === name)
+    setSelectedDest(selecting)
   }
 
   return (
@@ -275,12 +309,29 @@ export default function CreatePost() {
                   <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
                     Destinations
                   </div>
+                  <div className='p-4'>
+                    {
+                      destinations.map((d: DestinationProp, index: number) => <div
+                        key={`${index}+${d.spotName}`}
+                        className='flex justify-between mt-2 hover:text-indigo-500'>
+                        <div className='w-96 overflow-hidden'>
+                          <span>{d.spotName}</span>
+                        </div>
+                        <div>
+                          <button className='rounded border-indigo-500' onClick={e => handleShowEditDestination(e, d.spotName)}>
+                            <span className='text-indigo-500 text-xs'>more</span>
+                          </button>
+                        </div>
+                      </div>)
+                    }
+                  </div>
                   {/* add desitination button */}
-                  <div className="mt-8">
+                  <div className="mt-4">
                     <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
                       Add Desitination
                     </button>
                   </div>
+                  {/* add destination */}
                   {
                     showAddDest && <div className="flex w-screen h-full z-50 fixed top-0 right-0 bg-slate-500/50">
                       <div className="m-auto items-center w-1/2 h-auto py-6 bg-white rounded overflow-auto">
@@ -338,7 +389,7 @@ export default function CreatePost() {
                                           value={f.name}
                                           onChange={e => handleSpotFeature(f.id, e.target.checked)}
                                           className="form-checkbox" />
-                                        <span className="ml-2">Cafe</span>
+                                        <span className="ml-2">{f.name}</span>
                                       </label>)
                                     }
                                   </div>
@@ -374,7 +425,109 @@ export default function CreatePost() {
                             <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleShowDestination}>
                               Cancel
                             </button>
-                            <button className="py-2 px-4 bg-indigo-500 text-white rounded">
+                            <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleAddDestination}>
+                              Add Spot
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  {/* edit destination */}
+                  {
+                    showEditDest && <div className="flex w-screen h-full z-50 fixed top-0 right-0 bg-slate-500/50">
+                      <div className="m-auto items-center w-1/2 h-auto py-6 bg-white rounded overflow-auto">
+                        {/* select desitination information */}
+                        <div className='px-6'>
+                          {/* add destination dialog header */}
+                          <div className="flex justify-between items-center w-full">
+                            <h2 className='text-xl bold'>Add spot</h2>
+                            <div className="w-6 h-6 cursor-pointer" onClick={handleShowDestination}>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} className="w-6 h-6 stroke-slate-600">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </div>
+                          </div>
+                          {/* spot information */}
+                          <div className='mt-4'>
+                            {/* spot name */}
+                            <label className="block">
+                              <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Spot Name</span>
+                              <input
+                                type="text"
+                                value={selectedDest?.spotName}
+                                onChange={handleSpotName}
+                                className="block mt-1 p-1 w-full border border-slate-300 
+                                focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+                                  placeholder:text-sm"
+                                placeholder="spot name"
+                              />
+                            </label>
+                            {/* spot location */}
+                            <div className="flex mt-8">
+                              <ProvinceCity
+                                provinceList={regions}
+                                province={destPro}
+                                cityList={cityList}
+                                city={destCity}
+                                handleProvince={handleDestProvince}
+                                handleCity={handleDestCity}
+                              />
+                            </div>
+                            {/* spot features */}
+                            <div className="mt-8">
+                              <fieldset className="block">
+                                <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                  Spot Features</legend>
+                                <div className="flex mt-1">
+                                  <div className="mr-8">
+                                    {
+                                      features.map((f, index) => <label
+                                        key={`${index}+${f.name}`}
+                                        className="mr-8 inline-flex items-center">
+                                        <input
+                                          type="checkbox"
+                                          value={f.name}
+                                          onChange={e => handleSpotFeature(f.id, e.target.checked)}
+                                          className="form-checkbox" />
+                                        <span className="ml-2">{f.name}</span>
+                                      </label>)
+                                    }
+                                  </div>
+                                </div>
+                              </fieldset>
+                            </div>
+                            {/* spot activities */}
+                            <div className="mt-8">
+                              <fieldset className="block">
+                                <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                  Activities</legend>
+                                <div className="flex mt-1">
+                                  <div className="mr-8">
+                                    {
+                                      activities.map((a, index) => <label
+                                        key={`${index}+${a.name}`}
+                                        className="inline-flex items-center mr-8">
+                                        <input
+                                          type="checkbox"
+                                          value='hiking'
+                                          onChange={(e) => handleSpotActivity(a.id, e.target.checked)}
+                                          className="form-checkbox" />
+                                        <span className="ml-2">{a.name}</span>
+                                      </label>)
+                                    }
+                                  </div>
+                                </div>
+                              </fieldset>
+                            </div>
+                          </div>
+                          {/* submit add button */}
+                          <div className="flex justify-between mt-8">
+                            <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleShowDestination}>
+                              Cancel
+                            </button>
+                            <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleAddDestination}>
                               Add Spot
                             </button>
                           </div>
