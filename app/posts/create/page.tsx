@@ -6,6 +6,7 @@ import MainLayout from "@/app/layout/layout"
 import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
 import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
+import { v4 as uuidv4 }from 'uuid'
 
 var canada = require('canada')
 
@@ -20,6 +21,7 @@ export interface CityProp {
 }
 
 export interface DestinationProp {
+  id: string
   spotName: string
   spotFeatures: string[]
   spotActivities: string[]
@@ -64,6 +66,7 @@ export default function CreatePost() {
     'list', 'bullet', 'indent',
     'link', 'image'
   ]
+  const newid = uuidv4()
   const [editorValue, setEditorValue] = useState('');
   const [title, setTitle] = useState('')
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)
@@ -127,6 +130,7 @@ export default function CreatePost() {
       checked: false
     }
   ]
+  const [destinations, setDesitinations] = useState<DestinationProp[]>([])
   // create destination state management
   const [showCreateDest, setShowCreateDest] = useState(false)
   const handleShowDestination = () => setShowCreateDest(true)
@@ -142,18 +146,22 @@ export default function CreatePost() {
   const [createSpotName, setCreateSpotName] = useState('')
   const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => setCreateSpotName(e.currentTarget.value)
   const [createDestPro, setCreateDestPro] = useState('')
+  let defaultCity: string
+  const [createCityList, setCreateCityList] = useState<CityProp[]>([])
+  const [createDestCity, setCreateDestCity] = useState('')
   const handleCreateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setCreateDestPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCreateCityList(filterCityList)
+    defaultCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
+    console.log('default city: ', defaultCity)
+    setCreateDestCity(defaultCity)
   }
-  const [createCityList, setCreateCityList] = useState<CityProp[]>([])
-  const [createDestCity, setCreateDestCity] = useState('')
   const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
   const [createFeatures, setCreateFeatures] = useState(defaultFeatures)
   const [checkedCreateFeatures, setCheckedCreateFeatures] = useState<string[]>([])
   const handleCreateFeature = (name: string, checked: boolean) => {
-    const copyFeatures = [...features]
+    const copyFeatures = [...createFeatures]
     const clickedFeature = copyFeatures.find((t) => t.name === name)
     if (clickedFeature !== undefined) clickedFeature.checked = checked
     const checkedFeaturesArray = copyFeatures.filter((f) => f.checked === true)
@@ -167,7 +175,7 @@ export default function CreatePost() {
   const [createActivities, setCreateActivities] = useState(defaultActivities)
   const [checkedCreateActivities, setCheckedCreateActivities] = useState<string[]>([])
   const handleCreateActivity = (name: string, checked: boolean) => {
-    const copyActivities = [...activities]
+    const copyActivities = [...createActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
     if (clickedActivity !== undefined) clickedActivity.checked = checked
     const checkedActivitiesArray = copyActivities.filter((a) => a.checked === true)
@@ -180,27 +188,31 @@ export default function CreatePost() {
   }
   const handleCreateDestination = () => {
     destinations.push({
+      id: newid,
       spotName: createSpotName,
       spotFeatures: checkedCreateFeatures,
       spotActivities: checkedCreateActivities,
       spotProvince: createDestPro,
       spotCity: createDestCity
     })
+    console.log('destinations: ', destinations)
     handleCloseDestination()
-    console.log(createSpotName)
   }
 
   // update destination state management
   const [showUpdateDest, setShowUpdateDest] = useState(false)
-  const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, spotName: string) => {
+  const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string, spotName: string) => {
     setShowUpdateDest(true)
     const selectedDest = destinations.find((d) => d.spotName === spotName)
     if(selectedDest !== undefined) {
       const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === selectedDest.spotProvince)
+      setUpdateSpotId(selectedDest.id)
+      console.log('selected id: ', selectedDest.id)
       setUpdateCityList(filterCityList)
       setUpdateSpotName(selectedDest.spotName)
       setUpdateDestPro(selectedDest.spotProvince)
       setUpdateDestCity(selectedDest.spotCity)
+      console.log('selected city: ', selectedDest.spotCity)
       setCheckedUpdateFeatures(selectedDest.spotFeatures)
       setCheckedUpdateActivities(selectedDest.spotActivities)
     }
@@ -214,6 +226,7 @@ export default function CreatePost() {
     setCheckedUpdateFeatures([])
     setCheckedUpdateActivities([])
   }
+  const [updateSpotId, setUpdateSpotId] = useState('')
   const [updateSpotName, setUpdateSpotName] = useState('')
   const handleUpdateSpotName = (e: ChangeEvent<HTMLInputElement>) => setUpdateSpotName(e.currentTarget.value)
   const [updateDestPro, setUpdateDestPro] = useState('')
@@ -228,7 +241,7 @@ export default function CreatePost() {
   const [updateFeatures, setUpdateFeatures] = useState(defaultFeatures)
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   const handleUpdateFeature = (name: string, checked: boolean) => {
-    const copyFeatures = [...features]
+    const copyFeatures = [...updateFeatures]
     const clickedFeature = copyFeatures.find((t) => t.name === name)
     if (clickedFeature !== undefined) clickedFeature.checked = checked
     const checkedFeaturesArray = copyFeatures.filter((f) => f.checked === true)
@@ -242,7 +255,7 @@ export default function CreatePost() {
   const [updateActivities, setUpdateActivities] = useState(defaultActivities)
   const [checkedUpdateActivities, setCheckedUpdateActivities] = useState<string[]>([])
   const handleUpdateActivity = (name: string, checked: boolean) => {
-    const copyActivities = [...activities]
+    const copyActivities = [...updateActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
     if (clickedActivity !== undefined) clickedActivity.checked = checked
     const checkedActivitiesArray = copyActivities.filter((a) => a.checked === true)
@@ -253,91 +266,20 @@ export default function CreatePost() {
     setCheckedUpdateActivities(checking)
     setUpdateActivities(copyActivities)
   }
-  const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, spotName: string) => {
-    console.log('updating', spotName)
-    const updatingDest = destinations.find((d) => d.spotName === spotName)
-    // handleCloseDestination()
+  const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
+    const copyDestinations = [...destinations]
+    const updatingDest = copyDestinations.find((d) => d.id === id)
+    if(updatingDest !== undefined) {
+      updatingDest.spotName = updateSpotName
+      updatingDest.spotProvince = updateDestPro
+      updatingDest.spotCity = updateDestCity
+      updatingDest.spotFeatures = checkedUpdateFeatures
+      updatingDest.spotActivities = checkedUpdateActivities
+    }
+    setDesitinations(copyDestinations)
+    handleCloseUpdateDestination()
   }
   const handleDeleteDestination = () => { }
-
-
-
-
-  const [spotName, setSpotName] = useState('')
-  const [destPro, setDestPro] = useState('')
-  const handleDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
-    setDestPro(e.currentTarget.value)
-    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
-    setCityList(filterCityList)
-  }
-  const handleDestCity = (e: ChangeEvent<HTMLSelectElement>) => setDestCity(e.currentTarget.value)
-  const [destCity, setDestCity] = useState('')
-  const handleSpotName = (e: ChangeEvent<HTMLInputElement>) => setSpotName(e.currentTarget.value)
-
-  const [features, setFeatures] = useState(defaultFeatures)
-  const [checkedFeatures, setCheckedFeatures] = useState<string[]>([])
-  const handleSpotFeature = (name: string, checked: boolean) => {
-    const spotFeatures = [...features]
-    const clickedFeature = spotFeatures.find((t) => t.name === name)
-    if (clickedFeature !== undefined) clickedFeature.checked = checked
-    const checkedFeaturesArray = spotFeatures.filter((f) => f.checked === true)
-    let checking: string[] = []
-    checkedFeaturesArray.forEach((f) => {
-      if (f.checked === true) checking.push(f.name)
-    })
-    setCheckedFeatures(checking)
-    setFeatures(spotFeatures)
-  }
-
-
-  const [activities, setActivities] = useState(defaultActivities)
-  const [checkedActivities, setCheckdActivities] = useState<string[]>([])
-  const handleSpotActivity = (name: string, checked: boolean) => {
-    const spotActivities = [...activities]
-    const clickedActivity = spotActivities.find((t) => t.name === name)
-    if (clickedActivity !== undefined) clickedActivity.checked = checked
-    const checkedActivitiesArray = spotActivities.filter((a) => a.checked === true)
-    let checking: string[] = []
-    checkedActivitiesArray.forEach((a) => {
-      if (a.checked === true) checking.push(a.name)
-    })
-    setCheckdActivities(checking)
-    setActivities(spotActivities)
-  }
-
-  const [showEditDest, setShowEditDest] = useState(false)
-  // default value should get from API, rather than [], update it later
-  const [destinations, setDesitinations] = useState<DestinationProp[]>([])
-  const handleAddDestination = () => {
-    setShowCreateDest(false)
-    destinations.push({
-      spotName: spotName,
-      spotFeatures: checkedFeatures,
-      spotActivities: checkedActivities,
-      spotProvince: destPro,
-      spotCity: destCity
-    })
-  }
-  const [selectedDest, setSelectedDest] = useState<DestinationProp | undefined>(undefined)
-  const handleShowEditDestination = (e: MouseEvent<HTMLButtonElement>, name: string) => {
-    setShowEditDest(true)
-    const selecting = destinations.find((d) => d.spotName === name)
-    setSelectedDest(selecting)
-  }
-  // const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, name: string | undefined) => {
-  //   const copyDestinations = [...destinations]
-  //   const updatingDestinations = copyDestinations.find((d) => d.spotName === name)
-  //   if(updatingDestinations !== undefined) {
-  //     updatingDestinations.spotName = spotName
-  //     updatingDestinations.spotProvince = destPro
-  //     updatingDestinations.spotCity = destCity
-  //     updatingDestinations.spotActivities = checkedActivities
-  //     updatingDestinations.spotFeatures = checkedFeatures
-  //   }
-  //   setDesitinations(copyDestinations)
-  //   setShowEditDest(false)
-  // }
-  const handleCloseEditDestination = () => setShowEditDest(false)
 
   return (
     <MainLayout>
@@ -482,7 +424,7 @@ export default function CreatePost() {
                           <span>{d.spotName}</span>
                         </div>
                         <div>
-                          <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.spotName)}>
+                          <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id, d.spotName)}>
                             <span className='text-indigo-500 text-xs'>more</span>
                           </button>
                         </div>
@@ -519,6 +461,7 @@ export default function CreatePost() {
                   {
                     showUpdateDest && <UpdateDestination
                       handleCloseUpdateDestination={handleCloseUpdateDestination}
+                      updateSpotId={updateSpotId}
                       updateSpotName={updateSpotName}
                       handleUpdateSpotName={handleUpdateSpotName}
                       updateDestPro={updateDestPro}

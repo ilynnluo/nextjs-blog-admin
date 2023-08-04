@@ -7,6 +7,7 @@ const canada = require('canada')
 export default function UpdateDestination(
   props: {
     handleCloseUpdateDestination: () => void
+    updateSpotId: string
     updateSpotName: string
     handleUpdateSpotName: (e: ChangeEvent<HTMLInputElement>) => void
     updateDestPro: string
@@ -20,7 +21,7 @@ export default function UpdateDestination(
     updateActivities: ActivityProp[]
     checkedUpdateActivities: string[]
     handleUpdateActivity: (name: string, checked: boolean) => void
-    handleUpdateDestination: (e: MouseEvent<HTMLButtonElement>, name: string) => void
+    handleUpdateDestination: (e: MouseEvent<HTMLButtonElement>, id: string) => void
     handleDeleteDestination: (e: MouseEvent<HTMLButtonElement>, name: string) => void
   }
 ) {
@@ -31,15 +32,14 @@ export default function UpdateDestination(
     city: cityData[0]
   }))
   const handleCloseUpdateDestination = props.handleCloseUpdateDestination
+  const updateSpotId = props.updateSpotId
   const updateSpotName = props.updateSpotName
   const handleUpdateSpotName = props.handleUpdateSpotName
   const updateDestPro = props.updateDestPro
   const handleUpdateDestProvince = props.handleUpdateDestProvince
   const updateDestCity = props.updateDestCity
-  console.log('updateDestCity: ', updateDestCity)
   const handleUpdateDestCity = props.handleUpdateDestCity
   const updateCityList = props.updateCityList
-  console.log('updateCityList: ', updateCityList)
   const updateFeatures = props.updateFeatures
   const checkedUpdateFeatures = props.checkedUpdateFeatures
   const handleUpdateFeature = props.handleUpdateFeature
@@ -143,7 +143,7 @@ export default function UpdateDestination(
           <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={e => handleDeleteDestination(e, updateSpotName)}>
             Delete
           </button>
-          <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={e => handleUpdateDestination(e, updateSpotName)}>
+          <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={e => handleUpdateDestination(e, updateSpotId)}>
             Update
           </button>
         </div>
