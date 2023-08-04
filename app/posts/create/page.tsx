@@ -6,7 +6,7 @@ import MainLayout from "@/app/layout/layout"
 import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
 import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
-import { v4 as uuidv4 }from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
 var canada = require('canada')
 
@@ -98,12 +98,16 @@ export default function CreatePost() {
   }
   const [departPro, setDepartPro] = useState('')
   const [cityList, setCityList] = useState<CityProp[]>([])
+  const [departCity, setDepartCity] = useState('')
+  let defaultDepartCity
   const handleProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setDepartPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCityList(filterCityList)
+    defaultDepartCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
+    setDepartCity(defaultDepartCity)
+    console.log(defaultDepartCity)
   }
-  const [departCity, setDepartCity] = useState('')
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
 
   const defaultFeatures = [
@@ -202,15 +206,13 @@ export default function CreatePost() {
   const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string, spotName: string) => {
     setShowUpdateDest(true)
     const selectedDest = destinations.find((d) => d.spotName === spotName)
-    if(selectedDest !== undefined) {
+    if (selectedDest !== undefined) {
       const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === selectedDest.spotProvince)
       setUpdateSpotId(selectedDest.id)
-      console.log('selected id: ', selectedDest.id)
       setUpdateCityList(filterCityList)
       setUpdateSpotName(selectedDest.spotName)
       setUpdateDestPro(selectedDest.spotProvince)
       setUpdateDestCity(selectedDest.spotCity)
-      console.log('selected city: ', selectedDest.spotCity)
       setCheckedUpdateFeatures(selectedDest.spotFeatures)
       setCheckedUpdateActivities(selectedDest.spotActivities)
     }
@@ -267,7 +269,7 @@ export default function CreatePost() {
   const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
     const copyDestinations = [...destinations]
     const updatingDest = copyDestinations.find((d) => d.id === id)
-    if(updatingDest !== undefined) {
+    if (updatingDest !== undefined) {
       updatingDest.spotName = updateSpotName
       updatingDest.spotProvince = updateDestPro
       updatingDest.spotCity = updateDestCity
