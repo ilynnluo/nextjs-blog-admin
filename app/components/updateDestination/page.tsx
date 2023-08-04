@@ -22,7 +22,7 @@ export default function UpdateDestination(
     checkedUpdateActivities: string[]
     handleUpdateActivity: (name: string, checked: boolean) => void
     handleUpdateDestination: (e: MouseEvent<HTMLButtonElement>, id: string) => void
-    handleDeleteDestination: (e: MouseEvent<HTMLButtonElement>, name: string) => void
+    handleDeleteDestination: (id: string) => void
   }
 ) {
   const regionsData = canada.regions
@@ -140,7 +140,7 @@ export default function UpdateDestination(
         </div>
         {/* submit update button */}
         <div className="flex justify-between mt-8">
-          <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={e => handleDeleteDestination(e, updateSpotName)}>
+          <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={e => handleDeleteDestination(updateSpotId)}>
             Delete
           </button>
           <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={e => handleUpdateDestination(e, updateSpotId)}>

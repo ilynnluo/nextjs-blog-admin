@@ -154,7 +154,6 @@ export default function CreatePost() {
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCreateCityList(filterCityList)
     defaultCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
-    console.log('default city: ', defaultCity)
     setCreateDestCity(defaultCity)
   }
   const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
@@ -195,7 +194,6 @@ export default function CreatePost() {
       spotProvince: createDestPro,
       spotCity: createDestCity
     })
-    console.log('destinations: ', destinations)
     handleCloseDestination()
   }
 
@@ -279,7 +277,12 @@ export default function CreatePost() {
     setDesitinations(copyDestinations)
     handleCloseUpdateDestination()
   }
-  const handleDeleteDestination = () => { }
+  const handleDeleteDestination = (id: string) => {
+    const copyDestinations = [...destinations]
+    const updatedDestinations = copyDestinations.filter((d) => d.id !== id)
+    setDesitinations(updatedDestinations)
+    handleCloseUpdateDestination()
+  }
 
   return (
     <MainLayout>
