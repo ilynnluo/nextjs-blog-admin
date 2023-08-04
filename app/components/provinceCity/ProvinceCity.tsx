@@ -1,6 +1,5 @@
 import { ChangeEvent } from "react"
 import { CityProp } from "@/app/posts/create/page"
-// var canada = require('canada')
 
 export default function ProvinceCity(
   props: {
