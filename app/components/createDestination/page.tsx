@@ -7,6 +7,7 @@ var canada = require('canada')
 export default function CreateDestination(
   props: {
     handleCloseDestination: () => void
+    createSpotId: string
     createSpotName: string
     handleCreateSpotName: (e: ChangeEvent<HTMLInputElement>) => void
     createDestPro: string
@@ -31,6 +32,7 @@ export default function CreateDestination(
   }))
   const [cityList, setCityList] = useState<CityProp[]>([])
   const handleCloseDestination = props.handleCloseDestination
+  const createSpotId = props.createSpotId
   const createSpotName = props.createSpotName
   const handleSpotName = props.handleCreateSpotName
   const createDestPro = props.createDestPro
@@ -108,6 +110,7 @@ export default function CreateDestination(
   const handleAddDestination = () => {
     handleCloseDestination()
     destinations.push({
+      id: createSpotId,
       spotName: createSpotName,
       spotFeatures: checkedCreateFeatures,
       spotActivities: checkedCreateActivities,

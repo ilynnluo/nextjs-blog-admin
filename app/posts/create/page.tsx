@@ -66,7 +66,6 @@ export default function CreatePost() {
     'list', 'bullet', 'indent',
     'link', 'image'
   ]
-  const newid = uuidv4()
   const [editorValue, setEditorValue] = useState('');
   const [title, setTitle] = useState('')
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)
@@ -106,7 +105,6 @@ export default function CreatePost() {
     setCityList(filterCityList)
     defaultDepartCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
     setDepartCity(defaultDepartCity)
-    console.log(defaultDepartCity)
   }
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
 
@@ -147,6 +145,7 @@ export default function CreatePost() {
     setCheckedCreateFeatures([])
     setCheckedCreateActivities([])
   }
+  const [createSpotId, setCreateSpotId] = useState('')
   const [createSpotName, setCreateSpotName] = useState('')
   const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => setCreateSpotName(e.currentTarget.value)
   const [createDestPro, setCreateDestPro] = useState('')
@@ -190,8 +189,10 @@ export default function CreatePost() {
     setCreateActivities(copyActivities)
   }
   const handleCreateDestination = () => {
+    const newSpotId = uuidv4()
+    setCreateSpotId(newSpotId)
     destinations.push({
-      id: newid,
+      id: createSpotId,
       spotName: createSpotName,
       spotFeatures: checkedCreateFeatures,
       spotActivities: checkedCreateActivities,
@@ -446,6 +447,7 @@ export default function CreatePost() {
                   {
                     showCreateDest && <CreateDestination
                       handleCloseDestination={handleCloseDestination}
+                      createSpotId={createSpotId}
                       createSpotName={createSpotName}
                       handleCreateSpotName={handleCreateSpotName}
                       createDestPro={createDestPro}
