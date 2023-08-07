@@ -68,7 +68,13 @@ export default function CreatePost() {
   ]
   const [editorValue, setEditorValue] = useState('');
   const [title, setTitle] = useState('')
-  const handleTitle = (e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)
+  const [titleError, setTitleError] = useState<null | boolean>(null)
+  const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.currentTarget.value)
+    const titleValidation = e.target.validity.valid
+    titleValidation ? setTitleError(false) : setTitleError(true)
+    console.log('Title Validation: ', titleValidation)
+  }
   const [length, setLength] = useState('')
   const handleLength = (e: ChangeEvent<HTMLInputElement>) => setLength(e.currentTarget.value)
   const [timeUnit, setTimeUnit] = useState('')
@@ -325,11 +331,22 @@ export default function CreatePost() {
                       type="text"
                       value={title}
                       onChange={handleTitle}
+                      required
+                      minLength={3}
+                      maxLength={10}
                       className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
-                          placeholder:text-sm"
+                          placeholder:text-sm
+                        focus:invalid:border-pink-500 focus:invalid:ring-pink-100"
                       placeholder="place, features, group of target users will be good keywords"
                     />
+                    {
+                      titleError === null
+                        ? <span className='text-xs text-slate-500'>Please input at lease 3 charactors</span>
+                        : titleError
+                          ? <span className='text-xs text-pink-500'>Please input at lease 3 charactors</span>
+                          : <span className='text-xs text-emerald-500'>√</span>
+                    }
                   </label>
                   {/* how long spend */}
                   <div className="flex mt-8">

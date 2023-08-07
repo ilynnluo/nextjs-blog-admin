@@ -212,7 +212,7 @@ export default function CreateDestination(
           Cancel
         </button>
         <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleCreateDestination}>
-          Add Spot
+          Add
         </button>
       </div>
     </div>
