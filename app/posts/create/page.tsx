@@ -561,6 +561,7 @@ export default function CreatePost() {
                       handleCreateFeature={handleCreateFeature}
                       createActivities={createActivities}
                       checkedCreateActivities={checkedCreateActivities}
+                      createActivitiesError={createActivitiesError}
                       handleCreateActivity={handleCreateActivity}
                       handleCreateDestination={handleCreateDestination}
                     />
