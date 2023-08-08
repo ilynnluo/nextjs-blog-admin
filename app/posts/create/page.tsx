@@ -496,7 +496,7 @@ export default function CreatePost() {
                   <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
                     Departure
                   </div>
-                  <div className="flex mt-8 pl-4">
+                  <div className="mt-8 pl-4">
                     <ProvinceCity
                       provinceList={regions}
                       province={departPro}
@@ -505,6 +505,13 @@ export default function CreatePost() {
                       handleProvince={handleDepartProvince}
                       handleCity={handleCity}
                     />
+                    {
+                      departProError === null
+                        ? <span className='text-xs text-slate-500'>Please select a Province</span>
+                        : departProError
+                          ? <span className='text-xs text-pink-500'>Please select a Province</span>
+                          : <span className='text-xs text-emerald-500'>√</span>
+                    }
                   </div>
                 </div>
                 {/* Desitinations */}
@@ -550,6 +557,7 @@ export default function CreatePost() {
                       createCityList={createCityList}
                       createFeatures={createFeatures}
                       checkedCreateFeatures={checkedCreateFeatures}
+                      createFeaturesError={createFeaturesError}
                       handleCreateFeature={handleCreateFeature}
                       createActivities={createActivities}
                       checkedCreateActivities={checkedCreateActivities}

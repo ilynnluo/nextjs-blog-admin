@@ -19,9 +19,11 @@ export default function CreateDestination(
     createCityList: CityProp[]
     createFeatures: FeatureProp[]
     checkedCreateFeatures: string[]
+    createFeaturesError: boolean | null
     handleCreateFeature: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     createActivities: ActivityProp[]
     checkedCreateActivities: string[]
+    createActivitiesError: boolean | null
     handleCreateActivity: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     handleCreateDestination: () => void
   }
@@ -39,13 +41,16 @@ export default function CreateDestination(
   const createSpotNameError = props.createSpotNameError
   const handleSpotName = props.handleCreateSpotName
   const createDestPro = props.createDestPro
+  const createDestProError = props.createDestProError
   const handleCreateDestProvince = props.handleCreateDestProvince
   const createCityList = props.createCityList
   const createDestCity = props.createDestCity
   const handleCreateDestCity = props.handleCreateDestCity
   const checkedCreateFeatures = props.checkedCreateFeatures
+  const createFeaturesError = props.createFeaturesError
   const handleCreateFeature = props.handleCreateFeature
   const checkedCreateActivities = props.checkedCreateActivities
+  const createActivitiesError = props.createActivitiesError
   const handleCreateActivity = props.handleCreateActivity
   const handleCreateDestination = props.handleCreateDestination
 
@@ -145,6 +150,8 @@ export default function CreateDestination(
               type="text"
               value={createSpotName}
               onChange={handleSpotName}
+              minLength={2}
+              maxLength={50}
               required
               className="block mt-1 p-1 w-full border border-slate-300 
                          placeholder:text-sm placeholder:text-slate-300
@@ -161,7 +168,7 @@ export default function CreateDestination(
             }
           </label>
           {/* spot location */}
-          <div className="flex mt-8">
+          <div className="mt-8">
             <ProvinceCity
               provinceList={regions}
               province={createDestPro}
@@ -170,6 +177,13 @@ export default function CreateDestination(
               handleProvince={handleCreateDestProvince}
               handleCity={handleCreateDestCity}
             />
+            {
+              createDestProError === null
+                ? <span className='text-xs text-slate-500'>Please select a Province</span>
+                : createDestProError
+                  ? <span className='text-xs text-pink-500'>Please select a Province</span>
+                  : <span className='text-xs text-emerald-500'>√</span>
+            }
           </div>
           {/* spot features */}
           <div className="mt-8">
@@ -193,6 +207,13 @@ export default function CreateDestination(
                   }
                 </div>
               </div>
+              {
+                createFeaturesError === null
+                  ? <span className='text-xs text-slate-500'>Please select at least one feature</span>
+                  : createFeaturesError
+                    ? <span className='text-xs text-pink-500'>Please select at least one feature</span>
+                    : <span className='text-xs text-emerald-500'>√</span>
+              }
             </fieldset>
           </div>
           {/* spot activities */}
@@ -200,7 +221,7 @@ export default function CreateDestination(
             <fieldset className="block">
               <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
                 Activities</legend>
-              <div className="flex mt-1">
+              <div className="mt-1">
                 <div className="mr-8">
                   {
                     activities.map((a, index) => <label
@@ -215,6 +236,13 @@ export default function CreateDestination(
                     </label>)
                   }
                 </div>
+                {
+                  createActivitiesError === null
+                    ? <span className='text-xs text-slate-500'>Please select at least one activity</span>
+                    : createActivitiesError
+                      ? <span className='text-xs text-pink-500'>Please select at least one activity</span>
+                      : <span className='text-xs text-emerald-500'>√</span>
+                }
               </div>
             </fieldset>
           </div>
