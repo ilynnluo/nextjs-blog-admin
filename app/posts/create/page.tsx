@@ -139,6 +139,7 @@ export default function CreatePost() {
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
     setTimeUnit(e.currentTarget.value)
     timeUnitValidation = e.target.validity.valid
+    console.log('unit validation msg: ', timeUnitValidation)
     timeUnitValidation ? setTimeUnitError(false) : setTimeUnitError(true)
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
@@ -159,15 +160,20 @@ export default function CreatePost() {
     areaTagValidation ? setAreaTagError(false) : setAreaTagError(true)
   }
   const [departPro, setDepartPro] = useState('')
+  let departProvinceValidation
+  const [departProError, setDepartProError] = useState<boolean | null>(null)
   const [cityList, setCityList] = useState<CityProp[]>([])
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
-  const handleProvince = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleDepartProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setDepartPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCityList(filterCityList)
     defaultDepartCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
     setDepartCity(defaultDepartCity)
+    departProvinceValidation = e.target.validity.valid
+    console.log('depart province validation: ', departProvinceValidation)
+    departProvinceValidation ? setDepartProError(false) : setDepartProError(true)
   }
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
 
@@ -186,24 +192,38 @@ export default function CreatePost() {
   }
   const [createSpotId, setCreateSpotId] = useState('')
   const [createSpotName, setCreateSpotName] = useState('')
-  const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => setCreateSpotName(e.currentTarget.value)
+  const [createSpotNameError, setCreateSpotNameError] = useState<boolean | null>(null)
+  let createSpotNameValidation
+  const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => {
+    setCreateSpotName(e.currentTarget.value)
+    createSpotNameValidation = e.target.validity.valid
+    createSpotNameValidation ? setCreateSpotNameError(false) : setCreateSpotNameError(true)
+  }
   const [createDestPro, setCreateDestPro] = useState('')
+  const [createDestProError, setCreateDestProError] = useState<boolean | null>(null)
   let defaultCity: string
   const [createCityList, setCreateCityList] = useState<CityProp[]>([])
   const [createDestCity, setCreateDestCity] = useState('')
+  let createDestProValidation
   const handleCreateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setCreateDestPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCreateCityList(filterCityList)
     defaultCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
     setCreateDestCity(defaultCity)
+    createDestProValidation = e.target.validity.valid
+    createDestProValidation ? setCreateDestProError(false) : setCreateDestProError(true)
+    console.log('create destination Province validation: ', createDestProValidation)
   }
   const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
   const [createFeatures, setCreateFeatures] = useState(defaultFeatures)
   const [checkedCreateFeatures, setCheckedCreateFeatures] = useState<string[]>([])
-  const handleCreateFeature = (name: string, checked: boolean) => {
+  const [createFeaturesError, setCreateFeaturesError] = useState<boolean | null>(null)
+  let createFeatureValidation
+  const handleCreateFeature = (e: ChangeEvent<HTMLInputElement>, name: string) => {
     const copyFeatures = [...createFeatures]
     const clickedFeature = copyFeatures.find((t) => t.name === name)
+    const checked = e.target.checked
     if (clickedFeature !== undefined) clickedFeature.checked = checked
     const checkedFeaturesArray = copyFeatures.filter((f) => f.checked === true)
     let checking: string[] = []
@@ -212,12 +232,18 @@ export default function CreatePost() {
     })
     setCheckedCreateFeatures(checking)
     setCreateFeatures(copyFeatures)
+    createFeatureValidation = e.target.validity.valid
+    createFeatureValidation ? setCreateFeaturesError(false) : setCreateFeaturesError(true)
+    console.log('Feature Validation: ', createFeatureValidation)
   }
   const [createActivities, setCreateActivities] = useState(defaultActivities)
   const [checkedCreateActivities, setCheckedCreateActivities] = useState<string[]>([])
-  const handleCreateActivity = (name: string, checked: boolean) => {
+  const [createActivitiesError, setCreateActivitiesError] = useState<boolean | null>(null)
+  let createActivityValidation
+  const handleCreateActivity = (e: ChangeEvent<HTMLInputElement>,name: string) => {
     const copyActivities = [...createActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
+    const checked = e.target.checked
     if (clickedActivity !== undefined) clickedActivity.checked = checked
     const checkedActivitiesArray = copyActivities.filter((a) => a.checked === true)
     let checking: string[] = []
@@ -226,6 +252,9 @@ export default function CreatePost() {
     })
     setCheckedCreateActivities(checking)
     setCreateActivities(copyActivities)
+    createActivityValidation = e.target.validity.valid
+    createActivityValidation ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
+    console.log('Activities validation: ', setCreateActivitiesError)
   }
   const handleCreateDestination = () => {
     const newSpotId = uuidv4()
@@ -422,11 +451,11 @@ export default function CreatePost() {
                       </fieldset>
                     </div>
                     {
-                      timeLengthError === null && timeUnitError === null
+                      timeLengthError === null
                         ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
-                        : timeLengthError === true && timeUnitError === true
-                          ? <span className='text-xs text-emerald-500'>√</span>
-                          : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
+                        : timeLengthError === true
+                          ? <span className='text-xs text-pink-500'>Please input a number, less than 1000</span>
+                          : <span className='text-xs text-emerald-500'>√</span>
                     }
                   </div>
                   {/* general area tags */}
@@ -473,7 +502,7 @@ export default function CreatePost() {
                       province={departPro}
                       cityList={cityList}
                       city={departCity}
-                      handleProvince={handleProvince}
+                      handleProvince={handleDepartProvince}
                       handleCity={handleCity}
                     />
                   </div>
@@ -511,8 +540,10 @@ export default function CreatePost() {
                       handleCloseDestination={handleCloseDestination}
                       createSpotId={createSpotId}
                       createSpotName={createSpotName}
+                      createSpotNameError={createSpotNameError}
                       handleCreateSpotName={handleCreateSpotName}
                       createDestPro={createDestPro}
+                      createDestProError={createDestProError}
                       handleCreateDestProvince={handleCreateDestProvince}
                       createDestCity={createDestCity}
                       handleCreateDestCity={handleCreateDestCity}

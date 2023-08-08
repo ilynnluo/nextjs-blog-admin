@@ -25,6 +25,7 @@ export default function ProvinceCity(
         <select
           value={province}
           onChange={handleProvince}
+          required
           className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
                   focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
           <option value=''>Select a Province</option>

@@ -9,18 +9,20 @@ export default function CreateDestination(
     handleCloseDestination: () => void
     createSpotId: string
     createSpotName: string
+    createSpotNameError: boolean | null
     handleCreateSpotName: (e: ChangeEvent<HTMLInputElement>) => void
     createDestPro: string
+    createDestProError: boolean | null
     handleCreateDestProvince: (e: ChangeEvent<HTMLSelectElement>) => void
     createDestCity: string
     handleCreateDestCity: (e: ChangeEvent<HTMLSelectElement>) => void
     createCityList: CityProp[]
     createFeatures: FeatureProp[]
     checkedCreateFeatures: string[]
-    handleCreateFeature: (name: string, checked: boolean) => void
+    handleCreateFeature: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     createActivities: ActivityProp[]
     checkedCreateActivities: string[]
-    handleCreateActivity: (name: string, checked: boolean) => void
+    handleCreateActivity: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     handleCreateDestination: () => void
   }
 ) {
@@ -34,6 +36,7 @@ export default function CreateDestination(
   const handleCloseDestination = props.handleCloseDestination
   const createSpotId = props.createSpotId
   const createSpotName = props.createSpotName
+  const createSpotNameError = props.createSpotNameError
   const handleSpotName = props.handleCreateSpotName
   const createDestPro = props.createDestPro
   const handleCreateDestProvince = props.handleCreateDestProvince
@@ -120,102 +123,112 @@ export default function CreateDestination(
   }
 
   return <div className="flex w-screen h-full z-50 fixed top-0 right-0 bg-slate-500/50">
-  <div className="m-auto items-center w-1/2 h-auto py-6 bg-white rounded overflow-auto">
-    {/* select desitination information */}
-    <div className='px-6'>
-      {/* add destination dialog header */}
-      <div className="flex justify-between items-center w-full">
-        <h2 className='text-xl bold'>Add spot</h2>
-        <div className="w-6 h-6 cursor-pointer" onClick={handleCloseDestination}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} className="w-6 h-6 stroke-slate-600">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+    <div className="m-auto items-center w-1/2 h-auto py-6 bg-white rounded overflow-auto">
+      {/* select desitination information */}
+      <div className='px-6'>
+        {/* add destination dialog header */}
+        <div className="flex justify-between items-center w-full">
+          <h2 className='text-xl bold'>Add spot</h2>
+          <div className="w-6 h-6 cursor-pointer" onClick={handleCloseDestination}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} className="w-6 h-6 stroke-slate-600">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
         </div>
-      </div>
-      {/* spot information */}
-      <div className='mt-4'>
-        {/* spot name */}
-        <label className="block">
-          <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-            Spot Name</span>
-          <input
-            type="text"
-            value={createSpotName}
-            onChange={handleSpotName}
-            className="block mt-1 p-1 w-full border border-slate-300 
-            focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
-              placeholder:text-sm"
-            placeholder="spot name"
-          />
-        </label>
-        {/* spot location */}
-        <div className="flex mt-8">
-          <ProvinceCity
-            provinceList={regions}
-            province={createDestPro}
-            cityList={createCityList}
-            city={createDestCity}
-            handleProvince={handleCreateDestProvince}
-            handleCity={handleCreateDestCity}
-          />
-        </div>
-        {/* spot features */}
-        <div className="mt-8">
-          <fieldset className="block">
-            <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-              Spot Features</legend>
-            <div className="flex mt-1">
-              <div className="mr-8">
-                {
-                  features.map((f, index) => <label
-                    key={`${index}+${f.name}`}
-                    className="mr-8 inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      value={f.name}
-                      onChange={e => handleCreateFeature(f.name, e.target.checked)}
-                      className="form-checkbox" />
-                    <span className="ml-2">{f.name}</span>
-                  </label>)
-                }
+        {/* spot information */}
+        <div className='mt-4'>
+          {/* spot name */}
+          <label className="block">
+            <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+              Spot Name</span>
+            <input
+              type="text"
+              value={createSpotName}
+              onChange={handleSpotName}
+              required
+              className="block mt-1 p-1 w-full border border-slate-300 
+                         placeholder:text-sm placeholder:text-slate-300
+                       focus:invalid:border-pink-500 focus:invalid:ring-pink-100
+                       focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              placeholder="spot name"
+            />
+            {
+              createSpotNameError === null
+                ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
+                : createSpotNameError
+                  ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
+                  : <span className='text-xs text-emerald-500'>√</span>
+            }
+          </label>
+          {/* spot location */}
+          <div className="flex mt-8">
+            <ProvinceCity
+              provinceList={regions}
+              province={createDestPro}
+              cityList={createCityList}
+              city={createDestCity}
+              handleProvince={handleCreateDestProvince}
+              handleCity={handleCreateDestCity}
+            />
+          </div>
+          {/* spot features */}
+          <div className="mt-8">
+            <fieldset className="block">
+              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                Spot Features</legend>
+              <div className="flex mt-1">
+                <div className="mr-8">
+                  {
+                    features.map((f, index) => <label
+                      key={`${index}+${f.name}`}
+                      className="mr-8 inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        value={f.name}
+                        required
+                        onChange={e => handleCreateFeature(e, f.name)}
+                        className="form-checkbox" />
+                      <span className="ml-2">{f.name}</span>
+                    </label>)
+                  }
+                </div>
               </div>
-            </div>
-          </fieldset>
-        </div>
-        {/* spot activities */}
-        <div className="mt-8">
-          <fieldset className="block">
-            <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-              Activities</legend>
-            <div className="flex mt-1">
-              <div className="mr-8">
-                {
-                  activities.map((a, index) => <label
-                    key={`${index}+${a.name}`}
-                    className="inline-flex items-center mr-8">
-                    <input
-                      type="checkbox"
-                      value='hiking'
-                      onChange={(e) => handleCreateActivity(a.name, e.target.checked)}
-                      className="form-checkbox" />
-                    <span className="ml-2">{a.name}</span>
-                  </label>)
-                }
+            </fieldset>
+          </div>
+          {/* spot activities */}
+          <div className="mt-8">
+            <fieldset className="block">
+              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                Activities</legend>
+              <div className="flex mt-1">
+                <div className="mr-8">
+                  {
+                    activities.map((a, index) => <label
+                      key={`${index}+${a.name}`}
+                      className="inline-flex items-center mr-8">
+                      <input
+                        type="checkbox"
+                        value='hiking'
+                        onChange={(e) => handleCreateActivity(e, a.name)}
+                        className="form-checkbox" />
+                      <span className="ml-2">{a.name}</span>
+                    </label>)
+                  }
+                </div>
               </div>
-            </div>
-          </fieldset>
+            </fieldset>
+          </div>
         </div>
-      </div>
-      {/* submit add button */}
-      <div className="flex justify-between mt-8">
-        <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleCloseDestination}>
-          Cancel
-        </button>
-        <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleCreateDestination}>
-          Add
-        </button>
+        {/* submit add button */}
+        <div className="flex justify-between mt-8">
+          <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500" onClick={handleCloseDestination}>
+            Cancel
+          </button>
+          <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleCreateDestination}>
+            Add
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 }
