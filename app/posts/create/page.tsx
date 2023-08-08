@@ -41,6 +41,56 @@ export interface ActivityProp {
   checked: boolean
 }
 
+const defaultTags = [
+  {
+    id: 1,
+    name: 'GTA',
+    checked: false
+  },
+  {
+    id: 2,
+    name: 'Halifax',
+    checked: false
+  }
+]
+
+const defaultFeatures = [
+  {
+    id: 1,
+    name: 'Cafe',
+    checked: false
+  },
+  {
+    id: 2,
+    name: 'Park',
+    checked: false
+  }
+]
+const defaultActivities = [
+  {
+    id: 1,
+    name: 'Hiking',
+    checked: false
+  },
+  {
+    id: 2,
+    name: 'Swimming',
+    checked: false
+  }
+]
+const timeUnits = [
+  {
+    id: 1,
+    name: 'Days',
+    value: 'days'
+  },
+  {
+    id: 2,
+    name: 'Hours',
+    value: 'hours'
+  }
+]
+
 export default function CreatePost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
@@ -69,37 +119,44 @@ export default function CreatePost() {
   const [editorValue, setEditorValue] = useState('');
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<null | boolean>(null)
+  let titleValidation
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.currentTarget.value)
-    const titleValidation = e.target.validity.valid
+    titleValidation = e.target.validity.valid
     titleValidation ? setTitleError(false) : setTitleError(true)
-    console.log('Title Validation: ', titleValidation)
   }
   const [length, setLength] = useState('')
-  const handleLength = (e: ChangeEvent<HTMLInputElement>) => setLength(e.currentTarget.value)
+  const [timeLengthError, setTimeLengthError] = useState<boolean | null>(null)
+  let timeLengthValidation
+  const handleLength = (e: ChangeEvent<HTMLInputElement>) => {
+    setLength(e.currentTarget.value)
+    timeLengthValidation = e.target.validity.valid
+    timeLengthValidation ? setTimeLengthError(false) : setTimeLengthError(true)
+  }
   const [timeUnit, setTimeUnit] = useState('')
-  const handleTimeUnit = (e: MouseEvent<HTMLInputElement>) => setTimeUnit(e.currentTarget.value)
-  const defaultTags = [
-    {
-      id: 1,
-      name: 'GTA',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Halifax',
-      checked: false
-    }
-  ]
+  const [timeUnitError, setTimeUnitError] = useState<boolean | null>(null)
+  let timeUnitValidation
+  const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
+    setTimeUnit(e.currentTarget.value)
+    timeUnitValidation = e.target.validity.valid
+    timeUnitValidation ? setTimeUnitError(false) : setTimeUnitError(true)
+  }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const checkedTags: string[] = []
-  const handleAreaTag = (id: number, checked: boolean) => {
+  const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
+  let areaTagValidation
+  const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
+    // select checked tags
+    const checked = e.target.checked
     const tags = [...areaTags]
     const clickedTag = tags.find((t) => t.id === id)
     if (clickedTag !== undefined) clickedTag.checked = checked
     const checkedTagsArray = tags.filter((t) => t.checked === true)
     checkedTagsArray.forEach((t) => { if (t.checked) checkedTags.push(t.name) })
     setAreaTags(tags)
+    // validation
+    areaTagValidation = e.target.validity.valid
+    areaTagValidation ? setAreaTagError(false) : setAreaTagError(true)
   }
   const [departPro, setDepartPro] = useState('')
   const [cityList, setCityList] = useState<CityProp[]>([])
@@ -114,30 +171,6 @@ export default function CreatePost() {
   }
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
 
-  const defaultFeatures = [
-    {
-      id: 1,
-      name: 'Cafe',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Park',
-      checked: false
-    }
-  ]
-  const defaultActivities = [
-    {
-      id: 1,
-      name: 'Hiking',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Swimming',
-      checked: false
-    }
-  ]
   const [destinations, setDesitinations] = useState<DestinationProp[]>([])
   // create destination state management
   const [showCreateDest, setShowCreateDest] = useState(false)
@@ -336,61 +369,65 @@ export default function CreatePost() {
                       maxLength={10}
                       className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
-                          placeholder:text-sm
+                          placeholder:text-sm placeholder:text-slate-300
                         focus:invalid:border-pink-500 focus:invalid:ring-pink-100"
                       placeholder="place, features, group of target users will be good keywords"
                     />
                     {
                       titleError === null
-                        ? <span className='text-xs text-slate-500'>Please input at lease 3 charactors</span>
+                        ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
                         : titleError
-                          ? <span className='text-xs text-pink-500'>Please input at lease 3 charactors</span>
+                          ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
                           : <span className='text-xs text-emerald-500'>√</span>
                     }
                   </label>
                   {/* how long spend */}
-                  <div className="flex mt-8">
-                    <label className="block">
-                      <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                        Length</span>
-                      <input
-                        type="number"
-                        value={length}
-                        onChange={handleLength}
-                        className="form-input mt-1 p-1 w-48 block border border-slate-300
+                  <div className="mt-8">
+                    <div className="flex">
+                      <label className="block">
+                        <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                          Length</span>
+                        <input
+                          type="number"
+                          value={length}
+                          onChange={handleLength}
+                          required
+                          max={1000}
+                          className="form-input mt-1 p-1 w-48 block border border-slate-300
                           focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
-                            placeholder:text-sm"
-                        placeholder="number only"
-                      />
-                    </label>
-                    <fieldset className="block ml-8">
-                      <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                        Unit</legend>
-                      <div className="flex mt-2">
-                        <div className="mr-8">
-                          <label className="inline-flex items-center">
-                            <input
-                              value={TimeUnit.days}
-                              onClick={handleTimeUnit}
-                              className="form-radio"
-                              type="radio"
-                              name="radio-direct" />
-                            <span className="ml-2">Days</span>
-                          </label>
+                          focus:invalid:border-pink-500 focus:invalid:ring-pink-100
+                            placeholder:text-sm placeholder:text-slate-300"
+                          placeholder="number only"
+                        />
+                      </label>
+                      <fieldset className="block ml-8">
+                        <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                          Unit</legend>
+                        <div className="flex mt-2">
+                          <div className="mr-8">
+                            {
+                              timeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
+                                <input
+                                  type="radio"
+                                  value={t.value}
+                                  onChange={handleTimeUnit}
+                                  required
+                                  className="form-radio"
+                                  name="radio-direct" />
+                                <span className="ml-2 mr-8">{t.name}</span>
+                              </label>)
+                            }
+                          </div>
                         </div>
-                        <div>
-                          <label className="inline-flex items-center">
-                            <input
-                              value={TimeUnit.hours}
-                              onClick={handleTimeUnit}
-                              className="form-radio"
-                              type="radio"
-                              name="radio-direct" />
-                            <span className="ml-2">Hours</span>
-                          </label>
-                        </div>
-                      </div>
-                    </fieldset>
+                      </fieldset>
+                    </div>
+                    {
+                      timeLengthError === null && timeUnitError === null
+                        ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
+                        : timeLengthError === true && timeUnitError === true
+                          ? <span className='text-xs text-emerald-500'>√</span>
+                          : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
+                    }
                   </div>
                   {/* general area tags */}
                   <div className="mt-8">
@@ -405,7 +442,8 @@ export default function CreatePost() {
                                 type="checkbox"
                                 value='gta'
                                 checked={t.checked}
-                                onChange={e => handleAreaTag(t.id, e.target.checked)}
+                                onChange={e => handleAreaTag(e, t.id)}
+                                required
                                 className="form-checkbox" />
                               <span className="ml-2">
                                 {t.name}
@@ -414,6 +452,13 @@ export default function CreatePost() {
                           </div>)
                         }
                       </div>
+                      {
+                        areaTagError === null
+                          ? <span className='text-xs text-slate-500'>Please select at least 1 tag</span>
+                          : areaTagError
+                            ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
+                            : <span className='text-xs text-emerald-500'>√</span>
+                      }
                     </fieldset>
                   </div>
                 </div>
