@@ -193,33 +193,32 @@ export default function CreatePost() {
   const [createSpotId, setCreateSpotId] = useState('')
   const [createSpotName, setCreateSpotName] = useState('')
   const [createSpotNameError, setCreateSpotNameError] = useState<boolean | null>(null)
-  let createSpotNameValidation
+  const [createSpotNameValidation, setCreateSpotNameValidation] = useState(false)
   const handleCreateSpotName = (e: ChangeEvent<HTMLInputElement>) => {
     setCreateSpotName(e.currentTarget.value)
-    createSpotNameValidation = e.target.validity.valid
-    createSpotNameValidation ? setCreateSpotNameError(false) : setCreateSpotNameError(true)
+    setCreateSpotNameValidation(e.target.validity.valid)
+    e.target.validity.valid ? setCreateSpotNameError(false) : setCreateSpotNameError(true)
   }
   const [createDestPro, setCreateDestPro] = useState('')
   const [createDestProError, setCreateDestProError] = useState<boolean | null>(null)
   let defaultCity: string
   const [createCityList, setCreateCityList] = useState<CityProp[]>([])
   const [createDestCity, setCreateDestCity] = useState('')
-  let createDestProValidation
+  const [createDestProValidation, setCreateDestProValidation] = useState(false)
   const handleCreateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setCreateDestPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCreateCityList(filterCityList)
     defaultCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
     setCreateDestCity(defaultCity)
-    createDestProValidation = e.target.validity.valid
-    createDestProValidation ? setCreateDestProError(false) : setCreateDestProError(true)
-    console.log('create destination Province validation: ', createDestProValidation)
+    setCreateDestProValidation(e.target.validity.valid)
+    e.target.validity.valid ? setCreateDestProError(false) : setCreateDestProError(true)
   }
   const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
   const [createFeatures, setCreateFeatures] = useState(defaultFeatures)
   const [checkedCreateFeatures, setCheckedCreateFeatures] = useState<string[]>([])
   const [createFeaturesError, setCreateFeaturesError] = useState<boolean | null>(null)
-  let createFeatureValidation
+  const [createFeatureValidation, setCreateFeatureValidation] = useState(false)
   const handleCreateFeature = (e: ChangeEvent<HTMLInputElement>, name: string) => {
     const copyFeatures = [...createFeatures]
     const clickedFeature = copyFeatures.find((t) => t.name === name)
@@ -230,16 +229,16 @@ export default function CreatePost() {
     checkedFeaturesArray.forEach((f) => {
       if (f.checked === true) checking.push(f.name)
     })
+    const isChecked = checking.length > 0 ? true : false
     setCheckedCreateFeatures(checking)
     setCreateFeatures(copyFeatures)
-    createFeatureValidation = e.target.validity.valid
-    createFeatureValidation ? setCreateFeaturesError(false) : setCreateFeaturesError(true)
-    console.log('Feature Validation: ', createFeatureValidation)
+    setCreateFeatureValidation(isChecked)
+    isChecked ? setCreateFeaturesError(false) : setCreateFeaturesError(true)
   }
   const [createActivities, setCreateActivities] = useState(defaultActivities)
   const [checkedCreateActivities, setCheckedCreateActivities] = useState<string[]>([])
   const [createActivitiesError, setCreateActivitiesError] = useState<boolean | null>(null)
-  let createActivityValidation
+  const [createActivityValidation, setCreateActivityValidation] = useState(false)
   const handleCreateActivity = (e: ChangeEvent<HTMLInputElement>,name: string) => {
     const copyActivities = [...createActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
@@ -250,24 +249,33 @@ export default function CreatePost() {
     checkedActivitiesArray.forEach((a) => {
       if (a.checked === true) checking.push(a.name)
     })
+    const isChecked = checking.length > 0 ? true : false
     setCheckedCreateActivities(checking)
     setCreateActivities(copyActivities)
-    createActivityValidation = e.target.validity.valid
-    createActivityValidation ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
-    console.log('Activities validation: ', setCreateActivitiesError)
+    setCreateActivityValidation(isChecked)
+    isChecked ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
   }
+  
   const handleCreateDestination = () => {
     const newSpotId = uuidv4()
     setCreateSpotId(newSpotId)
-    destinations.push({
-      id: createSpotId,
-      spotName: createSpotName,
-      spotFeatures: checkedCreateFeatures,
-      spotActivities: checkedCreateActivities,
-      spotProvince: createDestPro,
-      spotCity: createDestCity
-    })
-    handleCloseDestination()
+    const destStatesValidations = [createSpotNameValidation, createDestProValidation, createFeatureValidation, createActivityValidation]
+    console.log('destStatesValidations: ', destStatesValidations)
+    createSpotNameValidation || setCreateSpotNameError(true)
+    createDestProValidation || setCreateDestProError(true)
+    createFeatureValidation || setCreateFeaturesError(true)
+    createActivityValidation || setCreateActivitiesError(true)
+    if(destStatesValidations.every(d => d === true)) {
+      destinations.push({
+        id: createSpotId,
+        spotName: createSpotName,
+        spotFeatures: checkedCreateFeatures,
+        spotActivities: checkedCreateActivities,
+        spotProvince: createDestPro,
+        spotCity: createDestCity
+      })
+      handleCloseDestination()
+    }
   }
 
   // update destination state management
@@ -556,11 +564,11 @@ export default function CreatePost() {
                       handleCreateDestCity={handleCreateDestCity}
                       createCityList={createCityList}
                       createFeatures={createFeatures}
-                      checkedCreateFeatures={checkedCreateFeatures}
+                      // checkedCreateFeatures={checkedCreateFeatures}
                       createFeaturesError={createFeaturesError}
                       handleCreateFeature={handleCreateFeature}
                       createActivities={createActivities}
-                      checkedCreateActivities={checkedCreateActivities}
+                      // checkedCreateActivities={checkedCreateActivities}
                       createActivitiesError={createActivitiesError}
                       handleCreateActivity={handleCreateActivity}
                       handleCreateDestination={handleCreateDestination}

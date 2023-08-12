@@ -1,8 +1,33 @@
-import React, { useState, ChangeEvent } from "react"
+import React, { ChangeEvent } from "react"
 import ProvinceCity from "../provinceCity/ProvinceCity"
-import { DestinationProp, CityProp, ActivityProp, FeatureProp } from "@/app/posts/create/page"
+import { CityProp, ActivityProp, FeatureProp } from "@/app/posts/create/page"
 
 var canada = require('canada')
+
+const defaultFeatures = [
+  {
+    id: 1,
+    name: 'Cafe',
+    checked: false
+  },
+  {
+    id: 2,
+    name: 'Park',
+    checked: false
+  }
+]
+const defaultActivities = [
+  {
+    id: 1,
+    name: 'Hiking',
+    checked: false
+  },
+  {
+    id: 2,
+    name: 'Swimming',
+    checked: false
+  }
+]
 
 export default function CreateDestination(
   props: {
@@ -18,11 +43,11 @@ export default function CreateDestination(
     handleCreateDestCity: (e: ChangeEvent<HTMLSelectElement>) => void
     createCityList: CityProp[]
     createFeatures: FeatureProp[]
-    checkedCreateFeatures: string[]
+    // checkedCreateFeatures: string[]
     createFeaturesError: boolean | null
     handleCreateFeature: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     createActivities: ActivityProp[]
-    checkedCreateActivities: string[]
+    // checkedCreateActivities: string[]
     createActivitiesError: boolean | null
     handleCreateActivity: (e: ChangeEvent<HTMLInputElement>, name: string) => void
     handleCreateDestination: () => void
@@ -30,11 +55,6 @@ export default function CreateDestination(
 ) {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
-  const cities = canada.cities.map((cityData: string[]) => ({
-    province: cityData[1],
-    city: cityData[0]
-  }))
-  const [cityList, setCityList] = useState<CityProp[]>([])
   const handleCloseDestination = props.handleCloseDestination
   const createSpotId = props.createSpotId
   const createSpotName = props.createSpotName
@@ -46,86 +66,13 @@ export default function CreateDestination(
   const createCityList = props.createCityList
   const createDestCity = props.createDestCity
   const handleCreateDestCity = props.handleCreateDestCity
-  const checkedCreateFeatures = props.checkedCreateFeatures
   const createFeaturesError = props.createFeaturesError
   const handleCreateFeature = props.handleCreateFeature
-  const checkedCreateActivities = props.checkedCreateActivities
   const createActivitiesError = props.createActivitiesError
   const handleCreateActivity = props.handleCreateActivity
   const handleCreateDestination = props.handleCreateDestination
 
-  const [destPro, setDestPro] = useState('')
-  const [destCity, setDestCity] = useState('')
-  const handleDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
-    setDestPro(e.currentTarget.value)
-    const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
-    setCityList(filterCityList)
-  }
-  const handleDestCity = (e: ChangeEvent<HTMLSelectElement>) => setDestCity(e.currentTarget.value)
-  const defaultFeatures = [
-    {
-      id: 1,
-      name: 'Cafe',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Park',
-      checked: false
-    }
-  ]
-  const [features, setFeatures] = useState(defaultFeatures)
-  const [checkedFeatures, setCheckedFeatures] = useState<string[]>([])
-  const handleSpotFeature = (name: string, checked: boolean) => {
-    const spotFeatures = [...features]
-    const clickedFeature = spotFeatures.find((t) => t.name === name)
-    if (clickedFeature !== undefined) clickedFeature.checked = checked
-    const checkedFeaturesArray = spotFeatures.filter((f) => f.checked === true)
-    let checking: string[] = []
-    checkedFeaturesArray.forEach((f) => {
-      if (f.checked === true) checking.push(f.name)
-    })
-    setCheckedFeatures(checking)
-    setFeatures(spotFeatures)
-  }
-  const defaultActivities = [
-    {
-      id: 1,
-      name: 'Hiking',
-      checked: false
-    },
-    {
-      id: 2,
-      name: 'Swimming',
-      checked: false
-    }
-  ]
-  const [activities, setActivities] = useState(defaultActivities)
-  const [checkedActivities, setCheckdActivities] = useState<string[]>([])
-  const handleSpotActivity = (name: string, checked: boolean) => {
-    const spotActivities = [...activities]
-    const clickedActivity = spotActivities.find((t) => t.name === name)
-    if (clickedActivity !== undefined) clickedActivity.checked = checked
-    const checkedActivitiesArray = spotActivities.filter((a) => a.checked === true)
-    let checking: string[] = []
-    checkedActivitiesArray.forEach((a) => {
-      if (a.checked === true) checking.push(a.name)
-    })
-    setCheckdActivities(checking)
-    setActivities(spotActivities)
-  }
-  const [destinations, setDesitinations] = useState<DestinationProp[]>([])
-  const handleAddDestination = () => {
-    handleCloseDestination()
-    destinations.push({
-      id: createSpotId,
-      spotName: createSpotName,
-      spotFeatures: checkedCreateFeatures,
-      spotActivities: checkedCreateActivities,
-      spotProvince: destPro,
-      spotCity: destCity
-    })
-  }
+
 
   return <div className="flex w-screen h-full z-50 fixed top-0 right-0 bg-slate-500/50">
     <div className="m-auto items-center w-1/2 h-auto py-6 bg-white rounded overflow-auto">
@@ -179,10 +126,10 @@ export default function CreateDestination(
             />
             {
               createDestProError === null
-                ? <span className='text-xs text-slate-500'>Please select a Province</span>
+                ? <div className="block h-6" />
                 : createDestProError
                   ? <span className='text-xs text-pink-500'>Please select a Province</span>
-                  : <span className='text-xs text-emerald-500'>√</span>
+                  : <div className="block h-6" />
             }
           </div>
           {/* spot features */}
@@ -193,7 +140,7 @@ export default function CreateDestination(
               <div className="flex mt-1">
                 <div className="mr-8">
                   {
-                    features.map((f, index) => <label
+                    defaultFeatures.map((f, index) => <label
                       key={`${index}+${f.name}`}
                       className="mr-8 inline-flex items-center">
                       <input
@@ -209,10 +156,10 @@ export default function CreateDestination(
               </div>
               {
                 createFeaturesError === null
-                  ? <span className='text-xs text-slate-500'>Please select at least one feature</span>
+                  ? <div className="block h-6" />
                   : createFeaturesError
                     ? <span className='text-xs text-pink-500'>Please select at least one feature</span>
-                    : <span className='text-xs text-emerald-500'>√</span>
+                    : <div className="block h-6" />
               }
             </fieldset>
           </div>
@@ -224,12 +171,13 @@ export default function CreateDestination(
               <div className="mt-1">
                 <div className="mr-8">
                   {
-                    activities.map((a, index) => <label
+                    defaultActivities.map((a, index) => <label
                       key={`${index}+${a.name}`}
                       className="inline-flex items-center mr-8">
                       <input
                         type="checkbox"
                         value='hiking'
+                        required
                         onChange={(e) => handleCreateActivity(e, a.name)}
                         className="form-checkbox" />
                       <span className="ml-2">{a.name}</span>
@@ -238,10 +186,10 @@ export default function CreateDestination(
                 </div>
                 {
                   createActivitiesError === null
-                    ? <span className='text-xs text-slate-500'>Please select at least one activity</span>
+                    ? <div className="block h-6" />
                     : createActivitiesError
                       ? <span className='text-xs text-pink-500'>Please select at least one activity</span>
-                      : <span className='text-xs text-emerald-500'>√</span>
+                      : <div className="block h-6" />
                 }
               </div>
             </fieldset>
