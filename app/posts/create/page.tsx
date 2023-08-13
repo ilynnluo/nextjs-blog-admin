@@ -386,6 +386,11 @@ export default function CreatePost() {
     areaTagValidation || setAreaTagError(true)
     departProvinceValidation || setDepartProError(true)
     destinationValidation || setDestinationError(true)
+    const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
+    if(validation.every(v => v === true)) {
+      return true
+    } 
+    return false
   }
   const [post, setPost] = useState<PostProp | null>(null)
   const newPostId = uuidv4()
@@ -409,9 +414,11 @@ export default function CreatePost() {
   const handlePublish = () => {
     setLoading(true)
     setFileType(FileType.published)
-    validationPost()
     setPost(updatingPost)
     console.log('publishing: ', post)
+    if(validationPost()) {
+      // api
+    }
   }
 
   return (
