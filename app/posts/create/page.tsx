@@ -10,11 +10,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 var canada = require('canada')
 
-enum TimeUnit {
-  hours = 'hours',
-  days = 'days'
-}
-
 export interface CityProp {
   province: string
   city: string
@@ -39,6 +34,11 @@ export interface ActivityProp {
   id: number
   name: string
   checked: boolean
+}
+
+enum FileType {
+  saved = 'saved',
+  published = 'published'
 }
 
 const defaultTags = [
@@ -119,33 +119,33 @@ export default function CreatePost() {
   const [editorValue, setEditorValue] = useState('');
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<null | boolean>(null)
-  let titleValidation
+  const [titleValidation, setTitleValidation] = useState(false)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.currentTarget.value)
-    titleValidation = e.target.validity.valid
-    titleValidation ? setTitleError(false) : setTitleError(true)
+    setTitleValidation(e.target.validity.valid)
+    e.target.validity.valid ? setTitleError(false) : setTitleError(true)
   }
   const [length, setLength] = useState('')
   const [timeLengthError, setTimeLengthError] = useState<boolean | null>(null)
-  let timeLengthValidation
+  const [timeLengthValidation, setTimeLengthValidation] = useState(false)
   const handleLength = (e: ChangeEvent<HTMLInputElement>) => {
     setLength(e.currentTarget.value)
-    timeLengthValidation = e.target.validity.valid
-    timeLengthValidation ? setTimeLengthError(false) : setTimeLengthError(true)
+    setTimeLengthValidation(v => v = e.target.validity.valid)
+    e.target.validity.valid ? setTimeLengthError(false) : setTimeLengthError(true)
+    console.log('length: ', timeLengthError, 'time: ', timeUnitError)
   }
-  const [timeUnit, setTimeUnit] = useState('')
+  let timeUnit
   const [timeUnitError, setTimeUnitError] = useState<boolean | null>(null)
-  let timeUnitValidation
+  const [timeUnitValidation, setTimeUnitValidation] = useState(false)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
-    setTimeUnit(e.currentTarget.value)
-    timeUnitValidation = e.target.validity.valid
-    console.log('unit validation msg: ', timeUnitValidation)
-    timeUnitValidation ? setTimeUnitError(false) : setTimeUnitError(true)
+    timeUnit = e.currentTarget.value
+    setTimeUnitValidation(e.target.validity.valid)
+    e.target.validity.valid ? setTimeUnitError(false) : setTimeUnitError(true)
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const checkedTags: string[] = []
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
-  let areaTagValidation
+  const [areaTagValidation, setAreaTagValidation] = useState(false)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
     // select checked tags
     const checked = e.target.checked
@@ -156,11 +156,12 @@ export default function CreatePost() {
     checkedTagsArray.forEach((t) => { if (t.checked) checkedTags.push(t.name) })
     setAreaTags(tags)
     // validation
-    areaTagValidation = e.target.validity.valid
-    areaTagValidation ? setAreaTagError(false) : setAreaTagError(true)
+    const isCheced = checkedTagsArray.length > 0 ? true : false
+    setAreaTagValidation(isCheced)
+    isCheced ? setAreaTagError(false) : setAreaTagError(true)
   }
   const [departPro, setDepartPro] = useState('')
-  let departProvinceValidation
+  const [departProvinceValidation, setDepartProvinceValidation] = useState(false)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
   const [cityList, setCityList] = useState<CityProp[]>([])
   const [departCity, setDepartCity] = useState('')
@@ -171,9 +172,8 @@ export default function CreatePost() {
     setCityList(filterCityList)
     defaultDepartCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
     setDepartCity(defaultDepartCity)
-    departProvinceValidation = e.target.validity.valid
-    console.log('depart province validation: ', departProvinceValidation)
-    departProvinceValidation ? setDepartProError(false) : setDepartProError(true)
+    setDepartProvinceValidation(e.target.validity.valid)
+    e.target.validity.valid ? setDepartProError(false) : setDepartProError(true)
   }
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
 
@@ -239,7 +239,7 @@ export default function CreatePost() {
   const [checkedCreateActivities, setCheckedCreateActivities] = useState<string[]>([])
   const [createActivitiesError, setCreateActivitiesError] = useState<boolean | null>(null)
   const [createActivityValidation, setCreateActivityValidation] = useState(false)
-  const handleCreateActivity = (e: ChangeEvent<HTMLInputElement>,name: string) => {
+  const handleCreateActivity = (e: ChangeEvent<HTMLInputElement>, name: string) => {
     const copyActivities = [...createActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
     const checked = e.target.checked
@@ -255,7 +255,8 @@ export default function CreatePost() {
     setCreateActivityValidation(isChecked)
     isChecked ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
   }
-  
+  const [destinationValidation, setDestinationValidation] = useState(false)
+  const [destinationError, setDestinationError] = useState<boolean | null>(null)
   const handleCreateDestination = () => {
     const newSpotId = uuidv4()
     setCreateSpotId(newSpotId)
@@ -265,7 +266,7 @@ export default function CreatePost() {
     createDestProValidation || setCreateDestProError(true)
     createFeatureValidation || setCreateFeaturesError(true)
     createActivityValidation || setCreateActivitiesError(true)
-    if(destStatesValidations.every(d => d === true)) {
+    if (destStatesValidations.every(d => d === true)) {
       destinations.push({
         id: createSpotId,
         spotName: createSpotName,
@@ -276,6 +277,9 @@ export default function CreatePost() {
       })
       handleCloseDestination()
     }
+    let isChecked = destinations.length > 0 ? true : false
+    setDestinationValidation(isChecked)
+    isChecked && setDestinationError(false)
   }
 
   // update destination state management
@@ -363,6 +367,38 @@ export default function CreatePost() {
     handleCloseUpdateDestination()
   }
 
+  // submit
+  const [fileType, setFileType] = useState<FileType | null>(null)
+  const [loading, setLoading] = useState(false)
+  const validationPost = () => {
+    const postStatesValidations = [
+      titleValidation,
+      timeLengthValidation,
+      timeUnitValidation,
+      areaTagValidation,
+      departProvinceValidation,
+      destinationValidation
+    ]
+    console.log('postStatesValidations: ', postStatesValidations)
+    titleValidation || setTitleError(true)
+    timeLengthValidation || setTimeLengthError(true)
+    timeUnitValidation || setTimeUnitError(true)
+    areaTagValidation || setAreaTagError(true)
+    departProvinceValidation || setDepartProError(true)
+    destinationValidation || setDestinationError(true)
+  }
+  const handleSave = () => {
+    setLoading(true)
+    setFileType(FileType.saved)
+    const newPostId = uuidv4()
+
+  }
+  const handlePublish = () => {
+    setLoading(true)
+    setFileType(FileType.published)
+    validationPost()
+  }
+
   return (
     <MainLayout>
       <div>
@@ -415,7 +451,7 @@ export default function CreatePost() {
                         ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
                         : titleError
                           ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
-                          : <span className='text-xs text-emerald-500'>√</span>
+                          : <div className="block h-6" />
                     }
                   </label>
                   {/* how long spend */}
@@ -459,11 +495,11 @@ export default function CreatePost() {
                       </fieldset>
                     </div>
                     {
-                      timeLengthError === null
+                      (timeLengthError === null && timeUnitError === null)
                         ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
-                        : timeLengthError === true
-                          ? <span className='text-xs text-pink-500'>Please input a number, less than 1000</span>
-                          : <span className='text-xs text-emerald-500'>√</span>
+                        : (timeLengthError === false && timeUnitError === false)
+                          ? <div className="block h-6" />
+                          : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
                     }
                   </div>
                   {/* general area tags */}
@@ -491,10 +527,10 @@ export default function CreatePost() {
                       </div>
                       {
                         areaTagError === null
-                          ? <span className='text-xs text-slate-500'>Please select at least 1 tag</span>
+                          ? <div className="block h-6" />
                           : areaTagError
                             ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
-                            : <span className='text-xs text-emerald-500'>√</span>
+                            : <div className="block h-6" />
                       }
                     </fieldset>
                   </div>
@@ -518,7 +554,7 @@ export default function CreatePost() {
                         ? <span className='text-xs text-slate-500'>Please select a Province</span>
                         : departProError
                           ? <span className='text-xs text-pink-500'>Please select a Province</span>
-                          : <span className='text-xs text-emerald-500'>√</span>
+                          : <div className="block h-6" />
                     }
                   </div>
                 </div>
@@ -548,6 +584,15 @@ export default function CreatePost() {
                     <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
                       Add Desitination
                     </button>
+                    <div>
+                      {
+                        destinationError === null
+                          ? <span className='text-xs text-slate-500'>Please add at lease one destination</span>
+                          : destinationError
+                            ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
+                            : <div className="block h-6" />
+                      }
+                    </div>
                   </div>
                   {/* add destination */}
                   {
@@ -564,11 +609,9 @@ export default function CreatePost() {
                       handleCreateDestCity={handleCreateDestCity}
                       createCityList={createCityList}
                       createFeatures={createFeatures}
-                      // checkedCreateFeatures={checkedCreateFeatures}
                       createFeaturesError={createFeaturesError}
                       handleCreateFeature={handleCreateFeature}
                       createActivities={createActivities}
-                      // checkedCreateActivities={checkedCreateActivities}
                       createActivitiesError={createActivitiesError}
                       handleCreateActivity={handleCreateActivity}
                       handleCreateDestination={handleCreateDestination}
@@ -627,10 +670,15 @@ export default function CreatePost() {
                 Delete
               </button>
               <div>
-                <button className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500">
+                <button
+                  className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
+                  onClick={handleSave}>
                   Save
                 </button>
-                <button className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded">
+                <button
+                  className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
+                  onClick={handlePublish}
+                >
                   Publish
                 </button>
               </div>
