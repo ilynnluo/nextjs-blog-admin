@@ -15,15 +15,6 @@ export interface CityProp {
   city: string
 }
 
-export interface DestinationProp {
-  id: string
-  spotName: string
-  spotFeatures: string[]
-  spotActivities: string[]
-  spotProvince: string
-  spotCity: string
-}
-
 export interface FeatureProp {
   id: number
   name: string
@@ -39,6 +30,26 @@ export interface ActivityProp {
 enum FileType {
   saved = 'saved',
   published = 'published'
+}
+
+export interface DestinationProp {
+  id: string
+  spotName: string
+  spotFeatures: string[]
+  spotActivities: string[]
+  spotProvince: string
+  spotCity: string
+}
+interface PostProp {
+  id: string
+  fileType: FileType | null
+  title: string
+  length: string
+  unit: string
+  areaTags: string[]
+  departProvince: string
+  departCity: string
+  destinations: DestinationProp[]
 }
 
 const defaultTags = [
@@ -132,18 +143,17 @@ export default function CreatePost() {
     setLength(e.currentTarget.value)
     setTimeLengthValidation(v => v = e.target.validity.valid)
     e.target.validity.valid ? setTimeLengthError(false) : setTimeLengthError(true)
-    console.log('length: ', timeLengthError, 'time: ', timeUnitError)
   }
-  let timeUnit
+  const [timeUnit, setTimeUnit] = useState('')
   const [timeUnitError, setTimeUnitError] = useState<boolean | null>(null)
   const [timeUnitValidation, setTimeUnitValidation] = useState(false)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
-    timeUnit = e.currentTarget.value
+    setTimeUnit(e.currentTarget.value)
     setTimeUnitValidation(e.target.validity.valid)
     e.target.validity.valid ? setTimeUnitError(false) : setTimeUnitError(true)
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
-  const checkedTags: string[] = []
+  const [checkedTags, setCheckedTags] = useState<string[]>([])
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(false)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
@@ -261,7 +271,6 @@ export default function CreatePost() {
     const newSpotId = uuidv4()
     setCreateSpotId(newSpotId)
     const destStatesValidations = [createSpotNameValidation, createDestProValidation, createFeatureValidation, createActivityValidation]
-    console.log('destStatesValidations: ', destStatesValidations)
     createSpotNameValidation || setCreateSpotNameError(true)
     createDestProValidation || setCreateDestProError(true)
     createFeatureValidation || setCreateFeaturesError(true)
@@ -371,15 +380,6 @@ export default function CreatePost() {
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
   const validationPost = () => {
-    const postStatesValidations = [
-      titleValidation,
-      timeLengthValidation,
-      timeUnitValidation,
-      areaTagValidation,
-      departProvinceValidation,
-      destinationValidation
-    ]
-    console.log('postStatesValidations: ', postStatesValidations)
     titleValidation || setTitleError(true)
     timeLengthValidation || setTimeLengthError(true)
     timeUnitValidation || setTimeUnitError(true)
@@ -387,16 +387,31 @@ export default function CreatePost() {
     departProvinceValidation || setDepartProError(true)
     destinationValidation || setDestinationError(true)
   }
+  const [post, setPost] = useState<PostProp | null>(null)
+  const newPostId = uuidv4()
+  const updatingPost = {
+    id: '',
+    fileType: fileType,
+    title: title,
+    length: length,
+    unit: timeUnit,
+    areaTags: checkedTags,
+    departProvince: departPro,
+    departCity: departCity,
+    destinations: destinations
+  }
   const handleSave = () => {
     setLoading(true)
     setFileType(FileType.saved)
-    const newPostId = uuidv4()
-
+    setPost(updatingPost)
+    console.log('save --- : ', post)
   }
   const handlePublish = () => {
     setLoading(true)
     setFileType(FileType.published)
     validationPost()
+    setPost(updatingPost)
+    console.log('publishing: ', post)
   }
 
   return (
