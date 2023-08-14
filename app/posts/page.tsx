@@ -35,7 +35,7 @@ export interface PostProp {
 }
 
 export default function PostList() {
-  const [posts, setPosts] = useState<PostProp[] | null>(null)
+  const [posts, setPosts] = useState<PostProp[]>([])
   const getPostTitle = async () => {
     try {
       const { data: response } = await axios.get('http://localhost:3000/posts')
@@ -53,7 +53,8 @@ export default function PostList() {
     <MainLayout>
       <ul>
         {
-          posts?.map((post: PostProp) =>
+          posts.length > 0
+          ? posts.map((post: PostProp) =>
             <li key={post.id} className="p-4 w-4/5 text-slate-600 hover:bg-slate-100 hover:rounded-sm">
               <div className="flex justify-between">
                 <p>
@@ -64,6 +65,7 @@ export default function PostList() {
                 </button>
               </div>
             </li>)
+          : <div>no data</div>
         }
       </ul>
     </MainLayout>

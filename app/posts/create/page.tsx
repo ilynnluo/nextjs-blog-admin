@@ -410,6 +410,7 @@ export default function CreatePost() {
     setFileType(FileType.saved)
     setPost(updatingPost)
     console.log('save --- : ', post)
+    // api
   }
   const handlePublish = () => {
     setLoading(true)
