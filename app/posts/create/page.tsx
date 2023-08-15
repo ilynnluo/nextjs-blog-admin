@@ -1,12 +1,13 @@
 'use client'
-import React, { ChangeEvent, MouseEvent, useState, useRef, FormEvent, useEffect } from 'react';
+import React, { ChangeEvent, MouseEvent, useState, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
 import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
 import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 var canada = require('canada')
 
@@ -290,6 +291,7 @@ export default function CreatePost() {
     setDestinationValidation(isChecked)
     isChecked && setDestinationError(false)
   }
+  const [createResult, setCreateResult] = useState(false)
 
   // update destination state management
   const [showUpdateDest, setShowUpdateDest] = useState(false)
@@ -387,9 +389,9 @@ export default function CreatePost() {
     departProvinceValidation || setDepartProError(true)
     destinationValidation || setDestinationError(true)
     const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
-    if(validation.every(v => v === true)) {
+    if (validation.every(v => v === true)) {
       return true
-    } 
+    }
     return false
   }
   const [post, setPost] = useState<PostProp | null>(null)
@@ -409,16 +411,26 @@ export default function CreatePost() {
     setLoading(true)
     setFileType(FileType.saved)
     setPost(updatingPost)
-    console.log('save --- : ', post)
-    // api
   }
   const handlePublish = () => {
     setLoading(true)
     setFileType(FileType.published)
     setPost(updatingPost)
-    console.log('publishing: ', post)
-    if(validationPost()) {
-      // api
+    const createPost = async () => {
+      try {
+        const { status } = await axios.post('http://localhost:3000/posts/create', {
+          post: post
+        })
+        if(status === 200) {
+          setCreateResult(true)
+        }
+      } catch(e: any) {
+        console.log('post api error: ', e.message)
+      }
+    }
+    if (validationPost()) {
+      // create api
+      createPost()
     }
   }
 
