@@ -396,7 +396,7 @@ export default function CreatePost() {
   }
   const [post, setPost] = useState<PostProp | null>(null)
   const newPostId = uuidv4()
-  const updatingPost = {
+  const updatingPost: PostProp = {
     id: '',
     fileType: fileType,
     title: title,
@@ -416,15 +416,18 @@ export default function CreatePost() {
     setLoading(true)
     setFileType(FileType.published)
     setPost(updatingPost)
+    console.log('updatingPost: ', updatingPost)
     const createPost = async () => {
+      console.log('api post: ', updatingPost)
       try {
         const { status } = await axios.post('http://localhost:3000/posts/create', {
           post: post
         })
-        if(status === 200) {
+        console.log('api status: ', status)
+        if (status === 200) {
           setCreateResult(true)
         }
-      } catch(e: any) {
+      } catch (e: any) {
         console.log('post api error: ', e.message)
       }
     }
