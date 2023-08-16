@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/layout";
 import axios from "axios";
+import Link from "next/link";
 
 export interface PostProp {
   "id": number
@@ -54,18 +55,20 @@ export default function PostList() {
       <ul>
         {
           posts.length > 0
-          ? posts.map((post: PostProp) =>
-            <li key={post.id} className="p-4 w-4/5 text-slate-600 hover:bg-slate-100 hover:rounded-sm">
-              <div className="flex justify-between">
-                <p>
-                  {post.title}
-                </p>
-                <button className="p-2 text-xs rounded bg-emerald-500 text-slate-50 hover:text-emerald-500  hover:bg-slate-50 hover:border-emerald-500">
-                  edit
-                </button>
-              </div>
-            </li>)
-          : <div>no data</div>
+            ? posts.map((post: PostProp) =>
+              <li key={post.id} className="p-4 w-4/5 text-slate-600 hover:bg-slate-100 hover:rounded-sm">
+                <Link href={`/posts/${post.id}`}>
+                  <div className="flex justify-between">
+                    <p>
+                      {post.title}
+                    </p>
+                    <button className="p-2 text-xs rounded bg-emerald-500 text-slate-50 hover:text-emerald-500  hover:bg-slate-50 hover:border-emerald-500">
+                      edit
+                    </button>
+                  </div>
+                </Link>
+              </li>)
+            : <div>no data</div>
         }
       </ul>
     </MainLayout>

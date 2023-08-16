@@ -106,9 +106,9 @@ export default function CreateDestination(
             />
             {
               createSpotNameError === null
-                ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
+                ? <span className='text-xs text-slate-500'>Please input at least 3 and no more than 50 charactors</span>
                 : createSpotNameError
-                  ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
+                  ? <span className='text-xs text-pink-500'>Please input at least 3 and no more than 50 charactors</span>
                   : <div className="block h-6" />
             }
           </label>

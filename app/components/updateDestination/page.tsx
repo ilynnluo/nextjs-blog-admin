@@ -9,17 +9,21 @@ export default function UpdateDestination(
     handleCloseUpdateDestination: () => void
     updateSpotId: string
     updateSpotName: string
+    updateSpotNameError: boolean | null
     handleUpdateSpotName: (e: ChangeEvent<HTMLInputElement>) => void
     updateDestPro: string
+    updateDestProError: boolean | null
     handleUpdateDestProvince: (e: ChangeEvent<HTMLSelectElement>) => void
     updateDestCity: string
     handleUpdateDestCity: (e: ChangeEvent<HTMLSelectElement>) => void
     updateCityList: CityProp[]
     updateFeatures: FeatureProp[]
-    checkedUpdateFeatures: string[]
+    // checkedUpdateFeatures: string[]
+    updateFeaturesError: boolean | null
     handleUpdateFeature: (name: string, checked: boolean) => void
     updateActivities: ActivityProp[]
-    checkedUpdateActivities: string[]
+    // checkedUpdateActivities: string[]
+    updateActivitiesError: boolean | null
     handleUpdateActivity: (name: string, checked: boolean) => void
     handleUpdateDestination: (e: MouseEvent<HTMLButtonElement>, id: string) => void
     handleDeleteDestination: (id: string) => void
@@ -34,17 +38,21 @@ export default function UpdateDestination(
   const handleCloseUpdateDestination = props.handleCloseUpdateDestination
   const updateSpotId = props.updateSpotId
   const updateSpotName = props.updateSpotName
+  const updateSpotNameError = props.updateSpotNameError
   const handleUpdateSpotName = props.handleUpdateSpotName
   const updateDestPro = props.updateDestPro
+  const updateDestProError = props.updateDestProError
   const handleUpdateDestProvince = props.handleUpdateDestProvince
   const updateDestCity = props.updateDestCity
   const handleUpdateDestCity = props.handleUpdateDestCity
   const updateCityList = props.updateCityList
   const updateFeatures = props.updateFeatures
-  const checkedUpdateFeatures = props.checkedUpdateFeatures
+  // const checkedUpdateFeatures = props.checkedUpdateFeatures
+  const updateFeaturesError = props.updateFeaturesError
   const handleUpdateFeature = props.handleUpdateFeature
   const updateActivities = props.updateActivities
-  const checkedUpdateActivities = props.checkedUpdateActivities
+  // const checkedUpdateActivities = props.checkedUpdateActivities
+  const updateActivitiesError = props.updateActivitiesError
   const handleUpdateActivity = props.handleUpdateActivity
   const handleUpdateDestination = props.handleUpdateDestination
   const handleDeleteDestination = props.handleDeleteDestination
@@ -69,14 +77,24 @@ export default function UpdateDestination(
             <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
               Spot Name</span>
             <input
+              required
               type="text"
               defaultValue={updateSpotName}
               onChange={handleUpdateSpotName}
+              minLength={3}
+              maxLength={50}
               className="block mt-1 p-1 w-full border border-slate-300 
             focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
               placeholder:text-sm"
               placeholder="spot name"
             />
+            {
+              updateSpotNameError === null
+                ? <span className='text-xs text-slate-500'>Please input at least 3 and no more than 50 charactors</span>
+                : updateSpotNameError
+                  ? <span className='text-xs text-pink-500'>Please input at least 3 and no more than 50 charactors</span>
+                  : <div className="block h-6" />
+            }
           </label>
           {/* spot location */}
           <div className="flex mt-8">
@@ -88,6 +106,13 @@ export default function UpdateDestination(
               handleProvince={handleUpdateDestProvince}
               handleCity={handleUpdateDestCity}
             />
+            {
+              updateDestProError === null
+                ? <div className="block h-6" />
+                : updateDestProError
+                  ? <span className='text-xs text-pink-500'>Please select a Province</span>
+                  : <div className="block h-6" />
+            }
           </div>
           {/* spot features */}
           <div className="mt-8">
@@ -111,6 +136,13 @@ export default function UpdateDestination(
                   }
                 </div>
               </div>
+              {
+                updateFeaturesError === null
+                  ? <div className="block h-6" />
+                  : updateFeaturesError
+                    ? <span className='text-xs text-pink-500'>Please select at least one feature</span>
+                    : <div className="block h-6" />
+              }
             </fieldset>
           </div>
           {/* spot activities */}
@@ -118,7 +150,7 @@ export default function UpdateDestination(
             <fieldset className="block">
               <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
                 Activities</legend>
-              <div className="flex mt-1">
+              <div className="mt-1">
                 <div className="mr-8">
                   {
                     updateActivities.map((a, index) => <label
@@ -134,6 +166,13 @@ export default function UpdateDestination(
                     </label>)
                   }
                 </div>
+                {
+                  updateActivitiesError === null
+                    ? <div className="block h-6" />
+                    : updateActivitiesError
+                      ? <span className='text-xs text-pink-500'>Please select at least one activity</span>
+                      : <div className="block h-6" />
+                }
               </div>
             </fieldset>
           </div>

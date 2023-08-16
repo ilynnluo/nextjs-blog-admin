@@ -15,24 +15,20 @@ export interface CityProp {
   province: string
   city: string
 }
-
 export interface FeatureProp {
   id: number
   name: string
   checked: boolean
 }
-
 export interface ActivityProp {
   id: number
   name: string
   checked: boolean
 }
-
 enum FileType {
   saved = 'saved',
   published = 'published'
 }
-
 export interface DestinationProp {
   id: string
   spotName: string
@@ -52,7 +48,6 @@ interface PostProp {
   departCity: string
   destinations: DestinationProp[]
 }
-
 const defaultTags = [
   {
     id: 1,
@@ -65,7 +60,6 @@ const defaultTags = [
     checked: false
   }
 ]
-
 const defaultFeatures = [
   {
     id: 1,
@@ -291,13 +285,12 @@ export default function CreatePost() {
     setDestinationValidation(isChecked)
     isChecked && setDestinationError(false)
   }
-  const [createResult, setCreateResult] = useState(false)
 
   // update destination state management
   const [showUpdateDest, setShowUpdateDest] = useState(false)
-  const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string, spotName: string) => {
+  const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
     setShowUpdateDest(true)
-    const selectedDest = destinations.find((d) => d.spotName === spotName)
+    const selectedDest = destinations.find((d) => d.id === id)
     if (selectedDest !== undefined) {
       const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === selectedDest.spotProvince)
       setUpdateSpotId(selectedDest.id)
@@ -320,18 +313,33 @@ export default function CreatePost() {
   }
   const [updateSpotId, setUpdateSpotId] = useState('')
   const [updateSpotName, setUpdateSpotName] = useState('')
-  const handleUpdateSpotName = (e: ChangeEvent<HTMLInputElement>) => setUpdateSpotName(e.currentTarget.value)
+  const [updateSpotNameError, setUpdateSpotNameError] = useState<boolean | null>(null)
+  const [updateSpotNameValidation, setUpdateSpotNameValidation] = useState(true)
+  const handleUpdateSpotName = (e: ChangeEvent<HTMLInputElement>) => {
+    setUpdateSpotName(e.currentTarget.value)
+    setUpdateSpotNameValidation(e.target.validity.valid)
+    e.target.validity.valid ? setUpdateSpotNameError(false) : setUpdateSpotNameError(true)
+  }
   const [updateDestPro, setUpdateDestPro] = useState('')
+  const [updateDestProError, setUpdateDestProError] = useState<boolean | null>(null)
+  const [updateDestProValidation, setUpdateDestProValidation] = useState(true)
+  const [updateCityList, setUpdateCityList] = useState<CityProp[]>([])
+  const [updateDestCity, setUpdateDestCity] = useState('')
+  let updateDefaultCity
   const handleUpdateDestProvince = (e: ChangeEvent<HTMLSelectElement>) => {
     setUpdateDestPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setUpdateCityList(filterCityList)
+    updateDefaultCity = cities.find((c: CityProp) => c.province === e.currentTarget.value).city
+    setUpdateDestCity(updateDefaultCity)
+    setUpdateDestProValidation(e.target.validity.valid)
+    e.target.validity.valid ? setUpdateDestProError(false) : setUpdateDestProError(true)
   }
-  const [updateCityList, setUpdateCityList] = useState<CityProp[]>([])
-  const [updateDestCity, setUpdateDestCity] = useState('')
   const handleUpdateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setUpdateDestCity(e.currentTarget.value)
   const [updateFeatures, setUpdateFeatures] = useState(defaultFeatures)
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
+  const [updateFeaturesError, setUpdateFeaturesError] = useState<boolean | null>(null)
+  const [updateFeatureValidation, setUpdateFeatureValidation] = useState(true)
   const handleUpdateFeature = (name: string, checked: boolean) => {
     const copyFeatures = [...updateFeatures]
     const clickedFeature = copyFeatures.find((t) => t.name === name)
@@ -343,9 +351,14 @@ export default function CreatePost() {
     })
     setCheckedUpdateFeatures(checking)
     setUpdateFeatures(copyFeatures)
+    const isChecked = checking.length > 0 ? true : false
+    setUpdateFeatureValidation(isChecked)
+    isChecked ? setUpdateFeaturesError(false) : setUpdateFeaturesError(true)
   }
   const [updateActivities, setUpdateActivities] = useState(defaultActivities)
   const [checkedUpdateActivities, setCheckedUpdateActivities] = useState<string[]>([])
+  const [updateActivitiesError, setUpdateActivitiesError] = useState<boolean | null>(null)
+  const [updateActivityValidation, setUpdateActivityValidation] = useState(true)
   const handleUpdateActivity = (name: string, checked: boolean) => {
     const copyActivities = [...updateActivities]
     const clickedActivity = copyActivities.find((t) => t.name === name)
@@ -357,19 +370,28 @@ export default function CreatePost() {
     })
     setCheckedUpdateActivities(checking)
     setUpdateActivities(copyActivities)
+    const isChecked = checking.length > 0 ? true : false
+    setUpdateActivityValidation(isChecked)
+    isChecked ? setUpdateActivitiesError(false) : setUpdateActivitiesError(true)
   }
   const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
+    const destStatesValidations = [updateSpotNameValidation, updateDestProValidation, updateFeatureValidation, updateActivityValidation]
+    console.log('destStatesValidations: ', destStatesValidations)
+    updateSpotNameValidation || setUpdateSpotNameError(true)
+    updateDestProValidation || setUpdateDestProError(true)
+    updateFeatureValidation || setUpdateFeaturesError(true)
+    updateActivityValidation || setUpdateActivitiesError(true)
     const copyDestinations = [...destinations]
-    const updatingDest = copyDestinations.find((d) => d.id === id)
-    if (updatingDest !== undefined) {
+    const updatingDest: DestinationProp | undefined = copyDestinations.find((d) => d.id === id)
+    if (destStatesValidations.every(d => d === true) && updatingDest !== undefined) {
       updatingDest.spotName = updateSpotName
       updatingDest.spotProvince = updateDestPro
       updatingDest.spotCity = updateDestCity
       updatingDest.spotFeatures = checkedUpdateFeatures
       updatingDest.spotActivities = checkedUpdateActivities
+      setDesitinations(copyDestinations)
+      handleCloseUpdateDestination()
     }
-    setDesitinations(copyDestinations)
-    handleCloseUpdateDestination()
   }
   const handleDeleteDestination = (id: string) => {
     const copyDestinations = [...destinations]
@@ -379,6 +401,7 @@ export default function CreatePost() {
   }
 
   // submit
+  const [createResult, setCreateResult] = useState(false)
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
   const validationPost = () => {
@@ -394,8 +417,6 @@ export default function CreatePost() {
     }
     return false
   }
-  const [post, setPost] = useState<PostProp | null>(null)
-  const newPostId = uuidv4()
   const updatingPost: PostProp = {
     id: '',
     fileType: fileType,
@@ -407,34 +428,27 @@ export default function CreatePost() {
     departCity: departCity,
     destinations: destinations
   }
+  const createPost = async () => {
+    try {
+      const { status } = await axios.post('http://localhost:3000/posts/create', {
+        post: updatingPost
+      })
+      if (status === 200) {
+        setCreateResult(true)
+      }
+    } catch (e: any) {
+      console.log('post api error: ', e.message)
+    }
+  }
   const handleSave = () => {
     setLoading(true)
     setFileType(FileType.saved)
-    setPost(updatingPost)
+    createPost()
   }
   const handlePublish = () => {
     setLoading(true)
     setFileType(FileType.published)
-    setPost(updatingPost)
-    console.log('updatingPost: ', updatingPost)
-    const createPost = async () => {
-      console.log('api post: ', updatingPost)
-      try {
-        const { status } = await axios.post('http://localhost:3000/posts/create', {
-          post: post
-        })
-        console.log('api status: ', status)
-        if (status === 200) {
-          setCreateResult(true)
-        }
-      } catch (e: any) {
-        console.log('post api error: ', e.message)
-      }
-    }
-    if (validationPost()) {
-      // create api
-      createPost()
-    }
+    validationPost() && createPost()
   }
 
   return (
@@ -610,7 +624,7 @@ export default function CreatePost() {
                           <span>{d.spotName}</span>
                         </div>
                         <div>
-                          <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id, d.spotName)}>
+                          <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id)}>
                             <span className='text-indigo-500 text-xs'>more</span>
                           </button>
                         </div>
@@ -661,17 +675,21 @@ export default function CreatePost() {
                       handleCloseUpdateDestination={handleCloseUpdateDestination}
                       updateSpotId={updateSpotId}
                       updateSpotName={updateSpotName}
+                      updateSpotNameError={updateSpotNameError}
                       handleUpdateSpotName={handleUpdateSpotName}
                       updateDestPro={updateDestPro}
+                      updateDestProError={updateDestProError}
                       handleUpdateDestProvince={handleUpdateDestProvince}
                       updateDestCity={updateDestCity}
                       handleUpdateDestCity={handleUpdateDestCity}
                       updateCityList={updateCityList}
                       updateFeatures={updateFeatures}
-                      checkedUpdateFeatures={checkedUpdateFeatures}
+                      // checkedUpdateFeatures={checkedUpdateFeatures}
+                      updateFeaturesError={updateFeaturesError}
                       handleUpdateFeature={handleUpdateFeature}
                       updateActivities={updateActivities}
-                      checkedUpdateActivities={checkedUpdateActivities}
+                      // checkedUpdateActivities={checkedUpdateActivities}
+                      updateActivitiesError={updateActivitiesError}
                       handleUpdateActivity={handleUpdateActivity}
                       handleUpdateDestination={handleUpdateDestination}
                       handleDeleteDestination={handleDeleteDestination}
