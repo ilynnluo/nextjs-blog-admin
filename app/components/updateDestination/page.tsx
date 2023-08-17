@@ -18,11 +18,9 @@ export default function UpdateDestination(
     handleUpdateDestCity: (e: ChangeEvent<HTMLSelectElement>) => void
     updateCityList: CityProp[]
     updateFeatures: FeatureProp[]
-    // checkedUpdateFeatures: string[]
     updateFeaturesError: boolean | null
     handleUpdateFeature: (name: string, checked: boolean) => void
     updateActivities: ActivityProp[]
-    // checkedUpdateActivities: string[]
     updateActivitiesError: boolean | null
     handleUpdateActivity: (name: string, checked: boolean) => void
     handleUpdateDestination: (e: MouseEvent<HTMLButtonElement>, id: string) => void
@@ -47,11 +45,9 @@ export default function UpdateDestination(
   const handleUpdateDestCity = props.handleUpdateDestCity
   const updateCityList = props.updateCityList
   const updateFeatures = props.updateFeatures
-  // const checkedUpdateFeatures = props.checkedUpdateFeatures
   const updateFeaturesError = props.updateFeaturesError
   const handleUpdateFeature = props.handleUpdateFeature
   const updateActivities = props.updateActivities
-  // const checkedUpdateActivities = props.checkedUpdateActivities
   const updateActivitiesError = props.updateActivitiesError
   const handleUpdateActivity = props.handleUpdateActivity
   const handleUpdateDestination = props.handleUpdateDestination
@@ -99,6 +95,7 @@ export default function UpdateDestination(
           {/* spot location */}
           <div className="flex mt-8">
             <ProvinceCity
+              defaultProvince={updateDestPro}
               provinceList={regions}
               province={updateDestPro}
               cityList={updateCityList}

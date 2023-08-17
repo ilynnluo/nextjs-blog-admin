@@ -25,7 +25,7 @@ export interface ActivityProp {
   name: string
   checked: boolean
 }
-enum FileType {
+export enum FileType {
   saved = 'saved',
   published = 'published'
 }
@@ -37,7 +37,7 @@ export interface DestinationProp {
   spotProvince: string
   spotCity: string
 }
-interface PostProp {
+export interface PostProp {
   id: string
   fileType: FileType | null
   title: string
@@ -594,6 +594,7 @@ export default function CreatePost() {
                   </div>
                   <div className="mt-8 pl-4">
                     <ProvinceCity
+                      defaultProvince=''
                       provinceList={regions}
                       province={departPro}
                       cityList={cityList}
@@ -684,11 +685,9 @@ export default function CreatePost() {
                       handleUpdateDestCity={handleUpdateDestCity}
                       updateCityList={updateCityList}
                       updateFeatures={updateFeatures}
-                      // checkedUpdateFeatures={checkedUpdateFeatures}
                       updateFeaturesError={updateFeaturesError}
                       handleUpdateFeature={handleUpdateFeature}
                       updateActivities={updateActivities}
-                      // checkedUpdateActivities={checkedUpdateActivities}
                       updateActivitiesError={updateActivitiesError}
                       handleUpdateActivity={handleUpdateActivity}
                       handleUpdateDestination={handleUpdateDestination}
