@@ -27,6 +27,7 @@ export default function UpdateDestination(
     handleDeleteDestination: (id: string) => void
   }
 ) {
+  console.log('props: ', props)
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
   const cities = canada.cities.map((cityData: string[]) => ({

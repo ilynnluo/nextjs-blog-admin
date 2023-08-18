@@ -92,6 +92,8 @@ export default function CreatePost() {
   const postId = params.id
   const [loadingPost, setLoadingPost] = useState(true)
   const [cityList, setCityList] = useState<CityProp[]>([])
+  const [destinations, setDestinations] = useState<DestinationProp[]>([])
+  const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   const getPost = async () => {
     try {
       const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
@@ -102,7 +104,7 @@ export default function CreatePost() {
       setCheckedTags(response.areaTags)
       setDepartPro(response.departure.province)
       setDepartCity(response.departure.city)
-      setDesitinations(response.destinations)
+      setDestinations(response.destinations)
       setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departure.province))
       console.log('response: ', response)
       setLoadingPost(false)
@@ -181,8 +183,6 @@ export default function CreatePost() {
     e.target.validity.valid ? setDepartProError(false) : setDepartProError(true)
   }
   const handleCity = (e: ChangeEvent<HTMLSelectElement>) => setDepartCity(e.currentTarget.value)
-
-  const [destinations, setDesitinations] = useState<DestinationProp[]>([])
   // create destination state management
   const [showCreateDest, setShowCreateDest] = useState(false)
   const handleShowDestination = () => setShowCreateDest(true)
@@ -299,7 +299,28 @@ export default function CreatePost() {
       setUpdateDestPro(selectedDest.spotProvince)
       setUpdateDestCity(selectedDest.spotCity)
       setCheckedUpdateFeatures(selectedDest.spotFeatures)
+      const getCheckedFeatures = updateFeatures.map(f => {
+        if (selectedDest.spotFeatures.find((s) => f.name === s.name)) {
+          return {
+            ...f,
+            checked: true
+          }
+        }
+        return f
+      })
+      setUpdateFeatures(getCheckedFeatures)
       setCheckedUpdateActivities(selectedDest.spotActivities)
+      const getCheckedActivities = updateActivities.map(a => {
+        if (selectedDest.spotActivities.find((s) => a.name === s.name)) {
+          return {
+            ...a,
+            checked: true
+          }
+        }
+        return a
+      })
+      console.log('getCheckedActivities >>>>>>>>>>> ', getCheckedActivities)
+      setUpdateActivities(getCheckedActivities)
     }
   }
   const handleCloseUpdateDestination = () => {
@@ -337,7 +358,7 @@ export default function CreatePost() {
   }
   const handleUpdateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setUpdateDestCity(e.currentTarget.value)
   const [updateFeatures, setUpdateFeatures] = useState(defaultFeatures)
-  const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
+  
   const [updateFeaturesError, setUpdateFeaturesError] = useState<boolean | null>(null)
   const [updateFeatureValidation, setUpdateFeatureValidation] = useState(true)
   const handleUpdateFeature = (name: string, checked: boolean) => {
@@ -389,14 +410,14 @@ export default function CreatePost() {
       updatingDest.spotCity = updateDestCity
       updatingDest.spotFeatures = checkedUpdateFeatures
       updatingDest.spotActivities = checkedUpdateActivities
-      setDesitinations(copyDestinations)
+      setDestinations(copyDestinations)
       handleCloseUpdateDestination()
     }
   }
   const handleDeleteDestination = (id: string) => {
     const copyDestinations = [...destinations]
     const updatedDestinations = copyDestinations.filter((d) => d.id !== id)
-    setDesitinations(updatedDestinations)
+    setDestinations(updatedDestinations)
     handleCloseUpdateDestination()
   }
 
