@@ -115,6 +115,8 @@ export default function CreateDestination(
           {/* spot location */}
           <div className="mt-8">
             <ProvinceCity
+              defaultProvince=''
+              defaultCity=''
               provinceList={regions}
               province={createDestPro}
               cityList={createCityList}

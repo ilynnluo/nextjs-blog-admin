@@ -4,6 +4,7 @@ import { CityProp } from "@/app/posts/create/page"
 export default function ProvinceCity(
   props: {
     defaultProvince: string
+    defaultCity: string
     provinceList: string[]
     province: string
     cityList: CityProp[]
@@ -12,11 +13,9 @@ export default function ProvinceCity(
     handleCity: (e: ChangeEvent<HTMLSelectElement>) => void
   }) {
   const defaultProvince = props.defaultProvince
-  console.log('defaultProvince: ', defaultProvince)
+  const defaultCity = props.defaultCity
   const province = props.province
   const provinceList = props.provinceList
-  console.log('provinceList: ', provinceList)
-  console.log('province: ', province)
   const cityList = props.cityList
   const handleProvince = props.handleProvince
   const city = props.city
@@ -28,7 +27,7 @@ export default function ProvinceCity(
         <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
           Province</span>
         <select
-          defaultValue='ON'
+          defaultValue={defaultProvince}
           // value={province}
           onChange={handleProvince}
           required
@@ -47,7 +46,7 @@ export default function ProvinceCity(
         <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
           City</span>
         <select
-          value={city}
+          defaultValue={defaultCity}
           onChange={handleCity}
           className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
               focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">

@@ -96,6 +96,7 @@ export default function UpdateDestination(
           <div className="flex mt-8">
             <ProvinceCity
               defaultProvince={updateDestPro}
+              defaultCity={updateDestCity}
               provinceList={regions}
               province={updateDestPro}
               cityList={updateCityList}

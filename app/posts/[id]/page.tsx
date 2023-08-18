@@ -69,7 +69,6 @@ export default function CreatePost() {
     province: cityData[1],
     city: cityData[0]
   }))
-  console.log('regions: ', regions)
   const defaultTab = useRef<HTMLButtonElement>(null)
   const [tab, setTab] = useState('basic')
   const handleTab = (e: MouseEvent<HTMLButtonElement>) => setTab(e.currentTarget.value)
@@ -92,6 +91,7 @@ export default function CreatePost() {
   const params = useParams()
   const postId = params.id
   const [loadingPost, setLoadingPost] = useState(true)
+  const [cityList, setCityList] = useState<CityProp[]>([])
   const getPost = async () => {
     try {
       const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
@@ -103,6 +103,7 @@ export default function CreatePost() {
       setDepartPro(response.departure.province)
       setDepartCity(response.departure.city)
       setDesitinations(response.destinations)
+      setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departure.province))
       console.log('response: ', response)
       setLoadingPost(false)
     } catch (e: any) {
@@ -168,11 +169,9 @@ export default function CreatePost() {
   const [departPro, setDepartPro] = useState('')
   const [departProvinceValidation, setDepartProvinceValidation] = useState(false)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
-  const [cityList, setCityList] = useState<CityProp[]>([])
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
   const handleDepartProvince = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log('>>>>>>', e.currentTarget.value)
     setDepartPro(e.currentTarget.value)
     const filterCityList = cities.filter((city: { city: string, province: string }) => city.province === e.currentTarget.value)
     setCityList(filterCityList)
@@ -600,6 +599,7 @@ export default function CreatePost() {
                       <div className="mt-8 pl-4">
                         <ProvinceCity
                           defaultProvince={departPro}
+                          defaultCity={departCity}
                           provinceList={regions}
                           province={departPro}
                           cityList={cityList}

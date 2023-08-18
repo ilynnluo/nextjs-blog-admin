@@ -595,6 +595,7 @@ export default function CreatePost() {
                   <div className="mt-8 pl-4">
                     <ProvinceCity
                       defaultProvince=''
+                      defaultCity=''
                       provinceList={regions}
                       province={departPro}
                       cityList={cityList}
