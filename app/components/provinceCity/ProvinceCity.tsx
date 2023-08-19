@@ -14,7 +14,6 @@ export default function ProvinceCity(
   }) {
   const defaultProvince = props.defaultProvince
   const defaultCity = props.defaultCity
-  console.log('defaultCity: ', defaultCity)
   const province = props.province
   const provinceList = props.provinceList
   const cityList = props.cityList

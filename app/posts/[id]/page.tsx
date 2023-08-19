@@ -102,6 +102,17 @@ export default function CreatePost() {
       setLength(response.length)
       setTimeUnit(response.unit)
       setCheckedTags(response.areaTags)
+      // get checked ara tags as default
+      const getCheckedAreaTags = defaultTags.map(t => {
+        if (response.areaTags.find((c) => c === t.name)) {
+          return {
+            ...t,
+            checked: true
+          }
+        }
+        return t
+      })
+      setAreaTags(getCheckedAreaTags)
       setDepartPro(response.departure.province)
       setDepartCity(response.departure.city)
       setDestinations(response.destinations)
@@ -112,10 +123,7 @@ export default function CreatePost() {
       console.log('error: ', e.message)
     }
   }
-  useEffect(() => {
-    getPost()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
@@ -142,16 +150,6 @@ export default function CreatePost() {
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const [checkedTags, setCheckedTags] = useState<string[]>([])
-  // get checked ara tags as default
-  const getCheckedAreaTags = areaTags.map(t => {
-    if (checkedTags.find((c) => c === t.name)) {
-      return {
-        ...t,
-        checked: true
-      }
-    }
-    return t
-  })
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(false)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
@@ -319,7 +317,6 @@ export default function CreatePost() {
         }
         return a
       })
-      console.log('getCheckedActivities >>>>>>>>>>> ', getCheckedActivities)
       setUpdateActivities(getCheckedActivities)
     }
   }
@@ -358,7 +355,6 @@ export default function CreatePost() {
   }
   const handleUpdateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setUpdateDestCity(e.currentTarget.value)
   const [updateFeatures, setUpdateFeatures] = useState(defaultFeatures)
-  
   const [updateFeaturesError, setUpdateFeaturesError] = useState<boolean | null>(null)
   const [updateFeatureValidation, setUpdateFeatureValidation] = useState(true)
   const handleUpdateFeature = (name: string, checked: boolean) => {
@@ -471,6 +467,10 @@ export default function CreatePost() {
     setFileType(FileType.published)
     validationPost() && createPost()
   }
+  useEffect(() => {
+    getPost()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <MainLayout>
@@ -586,7 +586,7 @@ export default function CreatePost() {
                             Area Tags</legend>
                           <div className="flex mt-1">
                             {
-                              getCheckedAreaTags.map((t) => <div key={t.name} className="mr-8">
+                              areaTags.map((t) => <div key={t.name} className="mr-8">
                                 <label className="inline-flex items-center">
                                   <input
                                     type="checkbox"
