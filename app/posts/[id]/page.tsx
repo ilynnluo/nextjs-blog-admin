@@ -94,6 +94,7 @@ export default function CreatePost() {
   const [cityList, setCityList] = useState<CityProp[]>([])
   const [destinations, setDestinations] = useState<DestinationProp[]>([])
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
+  let getCheckedAreaTags
   const getPost = async () => {
     try {
       const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
@@ -103,7 +104,7 @@ export default function CreatePost() {
       setTimeUnit(response.unit)
       setCheckedTags(response.areaTags)
       // get checked ara tags as default
-      const getCheckedAreaTags = defaultTags.map(t => {
+      getCheckedAreaTags = defaultTags.map(t => {
         if (response.areaTags.find((c: string) => c === t.name)) {
           return {
             ...t,
@@ -113,10 +114,10 @@ export default function CreatePost() {
         return t
       })
       setAreaTags(getCheckedAreaTags)
-      setDepartPro(response.departure.province)
-      setDepartCity(response.departure.city)
+      setDepartPro(response.departProvince)
+      setDepartCity(response.departCity)
       setDestinations(response.destinations)
-      setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departure.province))
+      setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departProvince))
       console.log('response: ', response)
       setLoadingPost(false)
     } catch (e: any) {
@@ -151,6 +152,7 @@ export default function CreatePost() {
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const [checkedTags, setCheckedTags] = useState<string[]>([])
+  
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(true)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
@@ -160,8 +162,12 @@ export default function CreatePost() {
     const clickedTag = tags.find((t) => t.id === id)
     if (clickedTag !== undefined) clickedTag.checked = checked
     const checkedTagsArray = tags.filter((t) => t.checked === true)
-    checkedTagsArray.forEach((t) => { if (t.checked) checkedTags.push(t.name) })
+    // it should be update the tags list data at every click
+    let updatingCheckedTags: string[] = []
+    checkedTagsArray.forEach((t) => { if (t.checked) updatingCheckedTags.push(t.name) })
+    console.log('to be checked tags in handle: ', tags)
     setAreaTags(tags)
+    setCheckedTags(updatingCheckedTags)
     // validation
     const isCheced = checkedTagsArray.length > 0 ? true : false
     setAreaTagValidation(isCheced)
