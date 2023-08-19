@@ -89,7 +89,7 @@ export default function CreatePost() {
   ]
   const [editorValue, setEditorValue] = useState('');
   const params = useParams()
-  const postId = params.id
+  const postId = params.id as string
   const [loadingPost, setLoadingPost] = useState(true)
   const [cityList, setCityList] = useState<CityProp[]>([])
   const [destinations, setDestinations] = useState<DestinationProp[]>([])
@@ -104,7 +104,7 @@ export default function CreatePost() {
       setCheckedTags(response.areaTags)
       // get checked ara tags as default
       const getCheckedAreaTags = defaultTags.map(t => {
-        if (response.areaTags.find((c) => c === t.name)) {
+        if (response.areaTags.find((c: string) => c === t.name)) {
           return {
             ...t,
             checked: true
@@ -128,13 +128,14 @@ export default function CreatePost() {
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log('title: ', e.currentTarget.value)
     setTitle(e.currentTarget.value)
     setTitleValidation(e.target.validity.valid)
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
   }
   const [length, setLength] = useState('')
   const [timeLengthError, setTimeLengthError] = useState(false)
-  const [timeLengthValidation, setTimeLengthValidation] = useState(false)
+  const [timeLengthValidation, setTimeLengthValidation] = useState(true)
   const handleLength = (e: ChangeEvent<HTMLInputElement>) => {
     setLength(e.currentTarget.value)
     setTimeLengthValidation(v => v = e.target.validity.valid)
@@ -142,7 +143,7 @@ export default function CreatePost() {
   }
   const [timeUnit, setTimeUnit] = useState('')
   const [timeUnitError, setTimeUnitError] = useState(false)
-  const [timeUnitValidation, setTimeUnitValidation] = useState(false)
+  const [timeUnitValidation, setTimeUnitValidation] = useState(true)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
     setTimeUnit(e.currentTarget.value)
     setTimeUnitValidation(e.target.validity.valid)
@@ -151,7 +152,7 @@ export default function CreatePost() {
   const [areaTags, setAreaTags] = useState(defaultTags)
   const [checkedTags, setCheckedTags] = useState<string[]>([])
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
-  const [areaTagValidation, setAreaTagValidation] = useState(false)
+  const [areaTagValidation, setAreaTagValidation] = useState(true)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
     // select checked tags
     const checked = e.target.checked
@@ -167,7 +168,7 @@ export default function CreatePost() {
     isCheced ? setAreaTagError(false) : setAreaTagError(true)
   }
   const [departPro, setDepartPro] = useState('')
-  const [departProvinceValidation, setDepartProvinceValidation] = useState(false)
+  const [departProvinceValidation, setDepartProvinceValidation] = useState(true)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
@@ -258,7 +259,7 @@ export default function CreatePost() {
     setCreateActivityValidation(isChecked)
     isChecked ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
   }
-  const [destinationValidation, setDestinationValidation] = useState(false)
+  const [destinationValidation, setDestinationValidation] = useState(true)
   const [destinationError, setDestinationError] = useState<boolean | null>(null)
   const handleCreateDestination = () => {
     const newSpotId = uuidv4()
@@ -298,7 +299,7 @@ export default function CreatePost() {
       setUpdateDestCity(selectedDest.spotCity)
       setCheckedUpdateFeatures(selectedDest.spotFeatures)
       const getCheckedFeatures = updateFeatures.map(f => {
-        if (selectedDest.spotFeatures.find((s) => f.name === s.name)) {
+        if (selectedDest.spotFeatures.find((s: any) => f.name === s.name)) {
           return {
             ...f,
             checked: true
@@ -309,7 +310,7 @@ export default function CreatePost() {
       setUpdateFeatures(getCheckedFeatures)
       setCheckedUpdateActivities(selectedDest.spotActivities)
       const getCheckedActivities = updateActivities.map(a => {
-        if (selectedDest.spotActivities.find((s) => a.name === s.name)) {
+        if (selectedDest.spotActivities.find((s: any) => a.name === s.name)) {
           return {
             ...a,
             checked: true
@@ -429,13 +430,14 @@ export default function CreatePost() {
     departProvinceValidation || setDepartProError(true)
     destinationValidation || setDestinationError(true)
     const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
+    console.log('validation: ', validation)
     if (validation.every(v => v === true)) {
       return true
     }
     return false
   }
   const updatingPost: PostProp = {
-    id: '',
+    id: postId,
     fileType: fileType,
     title: title,
     length: length,
@@ -445,11 +447,9 @@ export default function CreatePost() {
     departCity: departCity,
     destinations: destinations
   }
-  const createPost = async () => {
+  const updatePost = async () => {
     try {
-      const { status } = await axios.post('http://localhost:3000/posts/create', {
-        post: updatingPost
-      })
+      const { status } = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
       if (status === 200) {
         setCreateResult(true)
       }
@@ -460,12 +460,12 @@ export default function CreatePost() {
   const handleSave = () => {
     setLoading(true)
     setFileType(FileType.saved)
-    createPost()
+    updatePost()
   }
-  const handlePublish = () => {
+  const handleUpdate = () => {
     setLoading(true)
     setFileType(FileType.published)
-    validationPost() && createPost()
+    validationPost() && updatePost()
   }
   useEffect(() => {
     getPost()
@@ -515,7 +515,7 @@ export default function CreatePost() {
                           onChange={handleTitle}
                           required
                           minLength={3}
-                          maxLength={10}
+                          maxLength={100}
                           className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           placeholder:text-sm placeholder:text-slate-300
@@ -524,9 +524,9 @@ export default function CreatePost() {
                         />
                         {
                           titleError === null
-                            ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
+                            ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
                             : titleError
-                              ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
+                              ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
                               : <div className="block h-6" />
                         }
                       </label>
@@ -663,11 +663,9 @@ export default function CreatePost() {
                         </button>
                         <div>
                           {
-                            destinationError === null
-                              ? <span className='text-xs text-slate-500'>Please add at lease one destination</span>
-                              : destinationError
-                                ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
-                                : <div className="block h-6" />
+                            destinationError
+                              ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
+                              : <div className="block h-6" />
                           }
                         </div>
                       </div>
@@ -756,9 +754,9 @@ export default function CreatePost() {
                     </button>
                     <button
                       className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handlePublish}
+                      onClick={handleUpdate}
                     >
-                      Publish
+                      Update
                     </button>
                   </div>
                 </div>

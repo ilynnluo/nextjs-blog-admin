@@ -430,9 +430,7 @@ export default function CreatePost() {
   }
   const createPost = async () => {
     try {
-      const { status } = await axios.post('http://localhost:3000/posts/create', {
-        post: updatingPost
-      })
+      const { status } = await axios.post('http://localhost:3000/posts/create', updatingPost)
       if (status === 200) {
         setCreateResult(true)
       }
