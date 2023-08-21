@@ -489,7 +489,7 @@ export default function CreatePost() {
                       onChange={handleTitle}
                       required
                       minLength={3}
-                      maxLength={10}
+                      maxLength={100}
                       className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           placeholder:text-sm placeholder:text-slate-300
@@ -498,9 +498,9 @@ export default function CreatePost() {
                     />
                     {
                       titleError === null
-                        ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 50 charactors</span>
+                        ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
                         : titleError
-                          ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 50 charactors</span>
+                          ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
                           : <div className="block h-6" />
                     }
                   </label>

@@ -129,7 +129,7 @@ export default function CreatePost() {
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('title: ', e.currentTarget.value)
+    console.log('inputing: ', e.currentTarget.value)
     setTitle(e.currentTarget.value)
     setTitleValidation(e.target.validity.valid)
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
@@ -165,7 +165,6 @@ export default function CreatePost() {
     // it should be update the tags list data at every click
     let updatingCheckedTags: string[] = []
     checkedTagsArray.forEach((t) => { if (t.checked) updatingCheckedTags.push(t.name) })
-    console.log('to be checked tags in handle: ', tags)
     setAreaTags(tags)
     setCheckedTags(updatingCheckedTags)
     // validation
@@ -455,10 +454,12 @@ export default function CreatePost() {
   }
   const updatePost = async () => {
     try {
-      const { status } = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
-      if (status === 200) {
+      console.log('updating Post: ', updatingPost)
+      const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
+      if (response.status === 200) {
         setCreateResult(true)
       }
+      console.log('api response: ', response)
     } catch (e: any) {
       console.log('post api error: ', e.message)
     }
@@ -472,6 +473,17 @@ export default function CreatePost() {
     setLoading(true)
     setFileType(FileType.published)
     validationPost() && updatePost()
+  }
+  const handleDelete = () => {
+    const deletePost = async () => {
+      try {
+        const response = await axios.delete(`http://localhost: 3000/posts/${postId}`)
+        console.log('delete response: ', response)
+      } catch(e: any) {
+        console.log('delete error: ', e.message)
+      }
+    }
+    deletePost()
   }
   useEffect(() => {
     getPost()
@@ -749,7 +761,9 @@ export default function CreatePost() {
                 }
                 {/* submit Button */}
                 <div className="flex justify-between mt-12">
-                  <button className="py-2 px-4 bg-white text-red-500 rounded border border-red-500">
+                  <button
+                    className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
+                    onClick={handleDelete}>
                     Delete
                   </button>
                   <div>
