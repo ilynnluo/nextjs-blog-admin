@@ -1,48 +1,17 @@
 'use client'
 import { useEffect, useState } from "react";
-import MainLayout from "../layout/layout";
+import MainLayout from "../../layout/layout";
 import axios from "axios";
 import Link from "next/link";
-import { PostProp } from "./create/page";
+import { PostProp } from "../create/page";
 
-// export interface PostProp {
-//   "id": number
-//   "title": string
-//   "cover": string
-//   "introduction": string
-//   "length": number
-//   "unit": string
-//   "areaTags": string[]
-//   "departure": {
-//     "province": string
-//     "city": string
-//   },
-//   "desitinations": {
-//     "id": number
-//     "province": string
-//     "city": string
-//     "spots": {
-//       "id": number
-//       "name": string
-//     }[]
-//     "features": {
-//       "id": number
-//       "name": string
-//     }[]
-//     "activities": {
-//       "id": number
-//       "name": string
-//     }[]
-//   }[]
-// }
-
-export default function PostList() {
+export default function DraftPostList() {
   const [posts, setPosts] = useState<PostProp[]>([])
   const getPostTitle = async () => {
     try {
       const { data: response } = await axios.get('http://localhost:3000/posts')
-      const publisedPosts = response.filter((p: PostProp) => p.fileType === 'published')
-      setPosts(publisedPosts)
+      const draftPosts = response.filter((p: PostProp) => p.fileType === 'offline')
+      setPosts(draftPosts)
       return posts
     } catch (error) {
       console.log(error)
@@ -59,7 +28,7 @@ export default function PostList() {
           posts.length > 0
             ? posts.map((post: PostProp) =>
               <li key={post.id} className="p-4 w-4/5 text-slate-600 hover:bg-slate-100 hover:rounded-sm">
-                <Link href={`/posts/${post.id}`}>
+                <Link href={`/posts/draft/${post.id}`}>
                   <div className="flex justify-between">
                     <p>
                       {post.title}

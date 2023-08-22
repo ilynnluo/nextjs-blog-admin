@@ -7,7 +7,7 @@ import MainLayout from "@/app/layout/layout"
 import ProvinceCity from '@/app/components/provinceCity/ProvinceCity';
 import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
-import { CityProp, FeatureProp, ActivityProp, FileType, DestinationProp, PostProp } from '../create/page';
+import { CityProp, FileType, DestinationProp, PostProp } from '../create/page';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
@@ -129,7 +129,6 @@ export default function CreatePost() {
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('inputing: ', e.currentTarget.value)
     setTitle(e.currentTarget.value)
     setTitleValidation(e.target.validity.valid)
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
@@ -452,9 +451,10 @@ export default function CreatePost() {
     departCity: departCity,
     destinations: destinations
   }
+  console.log('rendering >>>>>>>>>>>>>>>>>> updating post: ', updatingPost)
   const updatePost = async () => {
     try {
-      console.log('updating Post: ', updatingPost)
+      console.log('sending Post: ', updatingPost)
       const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
       if (response.status === 200) {
         setCreateResult(true)
@@ -465,17 +465,14 @@ export default function CreatePost() {
     }
   }
   const handleOffline = () => {
-    setFileType(FileType.offline)
+    setFileType((t) => t = FileType.offline)
+    console.log('handleOffline: ', fileType)
     updatePost()
   }
-  const handleSave = () => {
-    setLoading(true)
-    setFileType(FileType.offline)
-    updatePost()
-  }
-  const handleUpdate = () => {
+  const handlePublish = () => {
     setLoading(true)
     setFileType(FileType.published)
+    console.log('handlePublish: ', fileType)
     validationPost() && updatePost()
   }
   const handleDelete = () => {
@@ -776,14 +773,14 @@ export default function CreatePost() {
                       onClick={handleOffline}>
                       Offline
                     </button>
-                    <button
+                    {/* <button
                       className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
                       onClick={handleSave}>
                       Save
-                    </button>
+                    </button> */}
                     <button
                       className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handleUpdate}>
+                      onClick={handlePublish}>
                       Publish
                     </button>
                   </div>

@@ -14,6 +14,11 @@ export default function SideBar() {
             Posts
           </Link>
         </li>
+        <li className="mb-2">
+          <Link href='/posts/draft'>
+            Draft
+          </Link>
+        </li>
       </ul>
     </div>
   )
