@@ -464,9 +464,13 @@ export default function CreatePost() {
       console.log('post api error: ', e.message)
     }
   }
+  const handleOffline = () => {
+    setFileType(FileType.offline)
+    updatePost()
+  }
   const handleSave = () => {
     setLoading(true)
-    setFileType(FileType.saved)
+    setFileType(FileType.offline)
     updatePost()
   }
   const handleUpdate = () => {
@@ -767,6 +771,11 @@ export default function CreatePost() {
                     Delete
                   </button>
                   <div>
+                  <button
+                      className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
+                      onClick={handleOffline}>
+                      Offline
+                    </button>
                     <button
                       className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
                       onClick={handleSave}>
@@ -774,9 +783,8 @@ export default function CreatePost() {
                     </button>
                     <button
                       className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handleUpdate}
-                    >
-                      Update
+                      onClick={handleUpdate}>
+                      Publish
                     </button>
                   </div>
                 </div>

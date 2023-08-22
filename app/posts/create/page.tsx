@@ -26,7 +26,7 @@ export interface ActivityProp {
   checked: boolean
 }
 export enum FileType {
-  saved = 'saved',
+  offline = 'offline',
   published = 'published'
 }
 export interface DestinationProp {
@@ -440,7 +440,7 @@ export default function CreatePost() {
   }
   const handleSave = () => {
     setLoading(true)
-    setFileType(FileType.saved)
+    setFileType(FileType.offline)
     createPost()
   }
   const handlePublish = () => {
