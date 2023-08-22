@@ -405,7 +405,6 @@ export default function CreatePost() {
       handleCloseUpdateDestination()
     }
   }
-  // const [postState, setPostState] = useState(FileType.offline)
   const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
     switch(e.currentTarget.value) {
       case 'offline': setFileType(FileType.offline); break;

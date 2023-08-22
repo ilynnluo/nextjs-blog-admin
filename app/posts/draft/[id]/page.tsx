@@ -61,6 +61,18 @@ const timeUnits = [
     value: 'hours'
   }
 ]
+const postStates = [
+  {
+    id: 1,
+    name: 'Draft',
+    value: 'offline'
+  },
+  {
+    id: 2,
+    name: 'Publish',
+    value: 'published'
+  }
+]
 
 export default function EditDraftPost() {
   const regionsData = canada.regions
@@ -421,6 +433,12 @@ export default function EditDraftPost() {
     setDestinations(updatedDestinations)
     handleCloseUpdateDestination()
   }
+  const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
+    switch(e.currentTarget.value) {
+      case 'offline': setFileType(FileType.offline); break;
+      case 'published': setFileType(FileType.published); break;
+    }
+  }
 
   // submit
   const [createResult, setCreateResult] = useState(false)
@@ -463,14 +481,12 @@ export default function EditDraftPost() {
       console.log('post api error: ', e.message)
     }
   }
-  const handleSave = () => {
+  const handleSubmit = () => {
     setLoading(true)
-    updatePost()
-  }
-  const handleUpdate = () => {
-    setLoading(true)
-    setFileType(FileType.published)
-    validationPost() && updatePost()
+    switch(fileType) {
+      case 'offline': updatePost(); break;
+      case 'published': validationPost() && updatePost(); break;
+    }
   }
   const handleDelete = () => {
     const deletePost = async () => {
@@ -765,15 +781,23 @@ export default function EditDraftPost() {
                     Delete
                   </button>
                   <div>
-                    <button
-                      className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
-                      onClick={handleSave}>
-                      Save
-                    </button>
+                  {
+                      postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          value={s.value}
+                          onChange={handlePostState}
+                          checked={s.value === 'offline'}
+                          required
+                          className="form-radio"
+                          name="radio-direct" />
+                        <span className="ml-2 mr-8">{s.name}</span>
+                      </label>)
+                    }
                     <button
                       className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handleUpdate}>
-                      Publish
+                      onClick={handleSubmit}>
+                      Submit
                     </button>
                   </div>
                 </div>

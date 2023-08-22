@@ -61,7 +61,18 @@ const timeUnits = [
     value: 'hours'
   }
 ]
-
+const postStates = [
+  {
+    id: 1,
+    name: 'Draft',
+    value: 'offline'
+  },
+  {
+    id: 2,
+    name: 'Publish',
+    value: 'published'
+  }
+]
 export default function CreatePost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
@@ -151,7 +162,7 @@ export default function CreatePost() {
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const [checkedTags, setCheckedTags] = useState<string[]>([])
-  
+
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(true)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
@@ -421,7 +432,12 @@ export default function CreatePost() {
     setDestinations(updatedDestinations)
     handleCloseUpdateDestination()
   }
-
+  const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
+    switch(e.currentTarget.value) {
+      case 'offline': setFileType(FileType.offline); break;
+      case 'published': setFileType(FileType.published); break;
+    }
+  }
   // submit
   const [createResult, setCreateResult] = useState(false)
   const [fileType, setFileType] = useState<FileType | null>(null)
@@ -451,36 +467,30 @@ export default function CreatePost() {
     departCity: departCity,
     destinations: destinations
   }
-  console.log('rendering >>>>>>>>>>>>>>>>>> updating post: ', updatingPost)
   const updatePost = async () => {
     try {
-      console.log('sending Post: ', updatingPost)
       const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
       if (response.status === 200) {
         setCreateResult(true)
       }
-      console.log('api response: ', response)
     } catch (e: any) {
       console.log('post api error: ', e.message)
     }
   }
-  const handleOffline = () => {
-    setFileType((t) => t = FileType.offline)
-    console.log('handleOffline: ', fileType)
-    updatePost()
-  }
-  const handlePublish = () => {
+  
+  const handleSubmit = () => {
     setLoading(true)
-    setFileType(FileType.published)
-    console.log('handlePublish: ', fileType)
-    validationPost() && updatePost()
+    switch(fileType) {
+      case 'offline': updatePost(); break;
+      case 'published': validationPost() && updatePost(); break;
+    }
   }
   const handleDelete = () => {
     const deletePost = async () => {
       try {
         const response = await axios.delete(`http://localhost: 3000/posts/${postId}`)
         console.log('delete response: ', response)
-      } catch(e: any) {
+      } catch (e: any) {
         console.log('delete error: ', e.message)
       }
     }
@@ -768,11 +778,19 @@ export default function CreatePost() {
                     Delete
                   </button>
                   <div>
-                  <button
-                      className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
-                      onClick={handleOffline}>
-                      Offline
-                    </button>
+                    {
+                      postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          value={s.value}
+                          onChange={handlePostState}
+                          checked={s.value === fileType}
+                          required
+                          className="form-radio"
+                          name="radio-direct" />
+                        <span className="ml-2 mr-8">{s.name}</span>
+                      </label>)
+                    }
                     {/* <button
                       className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
                       onClick={handleSave}>
@@ -780,8 +798,8 @@ export default function CreatePost() {
                     </button> */}
                     <button
                       className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handlePublish}>
-                      Publish
+                      onClick={handleSubmit}>
+                      Submit
                     </button>
                   </div>
                 </div>
