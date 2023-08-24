@@ -8,7 +8,6 @@ import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { redirect } from 'next/navigation'
 import { NextResponse } from 'next/server'
 
 var canada = require('canada')
