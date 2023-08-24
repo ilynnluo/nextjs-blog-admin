@@ -64,7 +64,7 @@ const timeUnits = [
 const postStates = [
   {
     id: 1,
-    name: 'Draft',
+    name: 'Offline',
     value: 'offline'
   },
   {
@@ -129,7 +129,6 @@ export default function CreatePost() {
       setDepartCity(response.departCity)
       setDestinations(response.destinations)
       setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departProvince))
-      console.log('response: ', response)
       setLoadingPost(false)
     } catch (e: any) {
       console.log('error: ', e.message)
@@ -409,7 +408,6 @@ export default function CreatePost() {
   }
   const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
     const destStatesValidations = [updateSpotNameValidation, updateDestProValidation, updateFeatureValidation, updateActivityValidation]
-    console.log('destStatesValidations: ', destStatesValidations)
     updateSpotNameValidation || setUpdateSpotNameError(true)
     updateDestProValidation || setUpdateDestProError(true)
     updateFeatureValidation || setUpdateFeaturesError(true)
@@ -450,7 +448,6 @@ export default function CreatePost() {
     departProvinceValidation || setDepartProError(true)
     destinationValidation || setDestinationError(true)
     const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
-    console.log('validation: ', validation)
     if (validation.every(v => v === true)) {
       return true
     }

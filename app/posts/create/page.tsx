@@ -8,6 +8,7 @@ import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { redirect } from 'next/navigation'
 
 var canada = require('canada')
 
@@ -388,7 +389,6 @@ export default function CreatePost() {
   }
   const handleUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
     const destStatesValidations = [updateSpotNameValidation, updateDestProValidation, updateFeatureValidation, updateActivityValidation]
-    console.log('destStatesValidations: ', destStatesValidations)
     updateSpotNameValidation || setUpdateSpotNameError(true)
     updateDestProValidation || setUpdateDestProError(true)
     updateFeatureValidation || setUpdateFeaturesError(true)
@@ -406,7 +406,7 @@ export default function CreatePost() {
     }
   }
   const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
-    switch(e.currentTarget.value) {
+    switch (e.currentTarget.value) {
       case 'offline': setFileType(FileType.offline); break;
       case 'published': setFileType(FileType.published); break;
     }
@@ -419,9 +419,12 @@ export default function CreatePost() {
   }
 
   // submit
-  const [createResult, setCreateResult] = useState(false)
-  const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingError, setLoadingError] = useState(null)
+  const [createNotice, setCreateNotice] = useState('')
+  const [createSuccess, setCreateSuccess] = useState<boolean | null>(null)
+  const [fileType, setFileType] = useState<FileType | null>(null)
+
   const validationPost = () => {
     titleValidation || setTitleError(true)
     timeLengthValidation || setTimeLengthError(true)
@@ -447,22 +450,36 @@ export default function CreatePost() {
     destinations: destinations
   }
   const createPost = async () => {
+    console.log('sending >>>>>>>>>>>> ')
+    setCreateSuccess(null)
     try {
       const response = await axios.post('http://localhost:3000/posts/create', updatingPost)
-      if (response.status === 200) {
-        setCreateResult(true)
+      console.log(' api response: ', response)
+      if (response.data === 'Fail, Title or ID duplicated') {
+        setCreateNotice('Title deplicated, plase input another title')
+        setCreateSuccess(false)
+      }
+      if (response.data === 'Created successfully') {
+        console.log('suceeded >>>>>>>> ')
+        setCreateSuccess(true)
+        if(fileType === 'offline') return redirect('http://localhost:3001/posts/draft')
+        // if(fileType === 'published') {redirect('http://localhost:3001/posts')}
       }
     } catch (e: any) {
-      console.log('post api error: ', e.message)
+      console.log('failed >>>>>>>> ')
+      console.log('submit error: ', e)
+      setLoadingError(e.message)
+      alert(`Error: ${e.message}`)
     }
   }
   const handleSubmit = () => {
-    setLoading(true)
-    switch(fileType) {
+    switch (fileType) {
       case 'offline': createPost(); break;
       case 'published': validationPost() && createPost(); break;
     }
+    setLoading(false)
   }
+  
 
   return (
     <MainLayout>
@@ -751,19 +768,44 @@ export default function CreatePost() {
                     <span className="ml-2 mr-8">{s.name}</span>
                   </label>)
                 }
-                {/* <button
-                  className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
-                  onClick={handleSave}>
-                  Save
-                </button> */}
                 <button
                   className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                  onClick={handleSubmit}
-                >
+                  onClick={handleSubmit}>
                   Submit
                 </button>
               </div>
             </div>
+            {
+              loading && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Loading
+              </div>
+            }
+            {
+              createSuccess === false && <div className='flex p-4 w-1/2 rounded bg-red-400 z-10 fixed top-10'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <p className="ml-4 text-white">Failed: {createNotice}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            }
+            {
+              createSuccess === true && <div className='flex p-4 w-1/2 rounded bg-green-400 z-10 fixed top-10'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+
+                <p className="ml-4 text-white">Successed: {createNotice}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            }
           </div>
         </div>
       </div>
