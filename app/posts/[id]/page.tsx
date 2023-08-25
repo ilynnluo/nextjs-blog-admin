@@ -431,7 +431,7 @@ export default function CreatePost() {
     handleCloseUpdateDestination()
   }
   const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
-    switch(e.currentTarget.value) {
+    switch (e.currentTarget.value) {
       case 'offline': setFileType(FileType.offline); break;
       case 'published': setFileType(FileType.published); break;
     }
@@ -474,10 +474,10 @@ export default function CreatePost() {
       console.log('post api error: ', e.message)
     }
   }
-  
+
   const handleSubmit = () => {
     setLoading(true)
-    switch(fileType) {
+    switch (fileType) {
       case 'offline': updatePost(); break;
       case 'published': validationPost() && updatePost(); break;
     }
@@ -803,7 +803,6 @@ export default function CreatePost() {
               </div>
             </div>
         }
-
       </div>
     </MainLayout>
   )

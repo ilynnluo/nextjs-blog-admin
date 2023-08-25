@@ -450,7 +450,7 @@ export default function CreatePost() {
     destinations: destinations
   }
   const createPost = async () => {
-    console.log('sending >>>>>>>>>>>> ')
+    setLoading(true)
     setCreateSuccess(null)
     try {
       const response = await axios.post('http://localhost:3000/posts/create', updatingPost)
@@ -458,16 +458,17 @@ export default function CreatePost() {
       if (response.data === 'Fail, Title or ID duplicated') {
         setCreateNotice('Title deplicated, plase input another title')
         setCreateSuccess(false)
+        setLoading(false)
       }
       if (response.data === 'Created successfully') {
-        console.log('suceeded >>>>>>>> ')
         setCreateSuccess(true)
         if(fileType === 'offline') return NextResponse.redirect('http://localhost:3001/posts/draft')
         if(fileType === 'published') return NextResponse.redirect('http://localhost:3001/posts')
+        setLoading(false)
       }
     } catch (e: any) {
-      console.log('failed >>>>>>>> ')
       console.log('submit error: ', e)
+      setLoading(false)
       setLoadingError(e.message)
       alert(`Error: ${e.message}`)
     }
@@ -775,6 +776,7 @@ export default function CreatePost() {
                 </button>
               </div>
             </div>
+            {/* submitted, waiting for result */}
             {
               loading && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -783,6 +785,7 @@ export default function CreatePost() {
                 Loading
               </div>
             }
+            {/* got response, fail alert */}
             {
               createSuccess === false && <div className='flex p-4 w-1/2 rounded bg-red-400 z-10 fixed top-10'>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
@@ -794,13 +797,13 @@ export default function CreatePost() {
                 </svg>
               </div>
             }
+            {/* got response, succeeded notification */}
             {
               createSuccess === true && <div className='flex p-4 w-1/2 rounded bg-emerald-500 z-10 fixed top-10'>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-
-                <p className="ml-4 text-white">Successed: {createNotice}</p>
+                <p className="ml-4 text-white">Succeeded: {createNotice}</p>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>

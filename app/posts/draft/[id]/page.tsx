@@ -10,6 +10,7 @@ import UpdateDestination from '@/app/components/updateDestination/page';
 import { CityProp, FileType, DestinationProp, PostProp } from '../../create/page';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { NextResponse } from 'next/server';
 
 var canada = require('canada')
 
@@ -103,6 +104,7 @@ export default function EditDraftPost() {
   const params = useParams()
   const postId = params.id as string
   const [loadingPost, setLoadingPost] = useState(true)
+  const [loadingPostError, setLoadingPostError] = useState(null)
   const [cityList, setCityList] = useState<CityProp[]>([])
   const [destinations, setDestinations] = useState<DestinationProp[]>([])
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
@@ -110,6 +112,7 @@ export default function EditDraftPost() {
   const getPost = async () => {
     try {
       const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
+      console.log('get response: ', response)
       setTitle(response.title)
       setFileType(response.fileType)
       setLength(response.length)
@@ -132,7 +135,9 @@ export default function EditDraftPost() {
       setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departProvince))
       setLoadingPost(false)
     } catch (e: any) {
-      console.log('error: ', e.message)
+      console.log('error: ', e)
+      setLoadingPost(false)
+      setLoadingPostError(e.message)
     }
   }
 
@@ -153,6 +158,8 @@ export default function EditDraftPost() {
     e.target.validity.valid ? setTimeLengthError(false) : setTimeLengthError(true)
   }
   const [timeUnit, setTimeUnit] = useState('')
+  console.log('timeUnit: ', timeUnit)
+  console.log('timeUnits: ', timeUnits)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
@@ -162,7 +169,6 @@ export default function EditDraftPost() {
   }
   const [areaTags, setAreaTags] = useState(defaultTags)
   const [checkedTags, setCheckedTags] = useState<string[]>([])
-
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(true)
   const handleAreaTag = (e: ChangeEvent<HTMLInputElement>, id: number) => {
@@ -432,16 +438,19 @@ export default function EditDraftPost() {
     handleCloseUpdateDestination()
   }
   const handlePostState = (e: ChangeEvent<HTMLInputElement>) => {
-    switch(e.currentTarget.value) {
+    switch (e.currentTarget.value) {
       case 'offline': setFileType(FileType.offline); break;
       case 'published': setFileType(FileType.published); break;
     }
   }
 
   // submit
-  const [createResult, setCreateResult] = useState(false)
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingError, setLoadingError] = useState(null)
+  const [updateNotice, setUpdateNotice] = useState('')
+  const [updateSuccess, setUpdateSuccess] = useState<boolean | null>(null)
+  const [deleteSuccess, setDeleteSuccess] = useState<boolean | null>(null)
   const validationPost = () => {
     titleValidation || setTitleError(true)
     timeLengthValidation || setTimeLengthError(true)
@@ -467,27 +476,46 @@ export default function EditDraftPost() {
     destinations: destinations
   }
   const updatePost = async () => {
+    setLoading(true)
+    setUpdateSuccess(null)
     try {
       const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
-      if (response.status === 200) {
-        setCreateResult(true)
+      console.log(' api response: ', response)
+      if (response.data === 'Failed, Title duplicated') {
+        setUpdateNotice('Title deplicated, plase input another title')
+        setUpdateSuccess(false)
+        setLoading(false)
+      }
+      if (response.data === 'Updated successfully') {
+        setUpdateSuccess(true)
+        setLoading(false)
+        if (fileType === 'offline') return NextResponse.redirect('http://localhost:3001/posts/draft')
+        if (fileType === 'published') return NextResponse.redirect('http://localhost:3001/posts')
       }
     } catch (e: any) {
-      console.log('post api error: ', e.message)
+      setLoading(false)
+      setLoadingError(e.message)
+      alert(`Error: ${e.message}`)
     }
   }
   const handleSubmit = () => {
     setLoading(true)
-    switch(fileType) {
+    switch (fileType) {
       case 'offline': updatePost(); break;
       case 'published': validationPost() && updatePost(); break;
     }
   }
   const handleDelete = () => {
     const deletePost = async () => {
+      setLoading(true)
       try {
-        const response = await axios.delete(`http://localhost: 3000/posts/${postId}`)
-        console.log('delete response: ', response)
+        const response = await axios.delete(`http://localhost:3000/posts/${postId}`)
+        if (response.data === 'Deleted successfully') {
+          setDeleteSuccess(true)
+          setLoading(false)
+          if (fileType === 'offline') return NextResponse.redirect('http://localhost:3001/posts/draft')
+          if (fileType === 'published') return NextResponse.redirect('http://localhost:3001/posts')
+        }
       } catch (e: any) {
         console.log('delete error: ', e.message)
       }
@@ -507,299 +535,355 @@ export default function EditDraftPost() {
         {/* main content */}
         {
           loadingPost
-            ? <div>Loading</div>
-            : <div className="max-w-3xl">
-              <div className='mt-8 pt-2 sticky top-0 bg-white'>
-                <button
-                  ref={defaultTab}
-                  value='basic'
-                  onClick={handleTab}
-                  className='pb-2 border-b-4 border-white  focus:border-emerald-500 focus-visible:border-white'>
-                  Basic Info</button>
-                <button
-                  value='main'
-                  onClick={handleTab}
-                  className='ml-8 pb-2 border-b-4 border-white  focus:border-emerald-500'>
-                  Main Content</button>
-              </div>
-              <div className="grid grid-cols-1">
-                {/* basic Tab */}
-                {
-                  tab === 'basic' && <div>
-                    {/* Create page title */}
-                    <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
-                      General
-                    </div>
-                    {/* General */}
-                    <div className='pl-4'>
-                      {/* input title */}
-                      <label className="block mt-8">
-                        <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                          Title</span>
-                        <input
-                          type="text"
-                          defaultValue={title}
-                          onChange={handleTitle}
-                          required
-                          minLength={3}
-                          maxLength={100}
-                          className="block mt-1 p-1 w-full border border-slate-300 
+            ? <div className='flex h-96 justify-center items-center'>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <span className='ml-2'>Loading Data</span>
+            </div>
+            : loadingPostError === null
+              ? <div className="max-w-3xl">
+                <div className='mt-8 pt-2 sticky top-0 bg-white'>
+                  <button
+                    ref={defaultTab}
+                    value='basic'
+                    onClick={handleTab}
+                    className='pb-2 border-b-4 border-white  focus:border-emerald-500 focus-visible:border-white'>
+                    Basic Info</button>
+                  <button
+                    value='main'
+                    onClick={handleTab}
+                    className='ml-8 pb-2 border-b-4 border-white  focus:border-emerald-500'>
+                    Main Content</button>
+                </div>
+                <div className="grid grid-cols-1">
+                  {/* basic Tab */}
+                  {
+                    tab === 'basic' && <div>
+                      {/* Create page title */}
+                      <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
+                        General
+                      </div>
+                      {/* General */}
+                      <div className='pl-4'>
+                        {/* input title */}
+                        <label className="block mt-8">
+                          <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                            Title</span>
+                          <input
+                            type="text"
+                            defaultValue={title}
+                            onChange={handleTitle}
+                            required
+                            minLength={3}
+                            maxLength={100}
+                            className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           placeholder:text-sm placeholder:text-slate-300
                         focus:invalid:border-pink-500 focus:invalid:ring-pink-100"
-                          placeholder="place, features, group of target users will be good keywords"
-                        />
-                        {
-                          titleError === null
-                            ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
-                            : titleError
-                              ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
-                              : <div className="block h-6" />
-                        }
-                      </label>
-                      {/* how long spend */}
-                      <div className="mt-8">
-                        <div className="flex">
-                          <label className="block">
-                            <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                              Length</span>
-                            <input
-                              type="number"
-                              value={length}
-                              onChange={handleLength}
-                              required
-                              max={1000}
-                              className="form-input mt-1 p-1 w-48 block border border-slate-300
+                            placeholder="place, features, group of target users will be good keywords"
+                          />
+                          {
+                            titleError === null
+                              ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
+                              : titleError
+                                ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
+                                : <div className="block h-6" />
+                          }
+                        </label>
+                        {/* how long spend */}
+                        <div className="mt-8">
+                          <div className="flex">
+                            <label className="block">
+                              <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Length</span>
+                              <input
+                                type="number"
+                                value={length}
+                                onChange={handleLength}
+                                required
+                                max={1000}
+                                className="form-input mt-1 p-1 w-48 block border border-slate-300
                           focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           focus:invalid:border-pink-500 focus:invalid:ring-pink-100
                             placeholder:text-sm placeholder:text-slate-300"
-                              placeholder="number only"
-                            />
-                          </label>
-                          <fieldset className="block ml-8">
-                            <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                              Unit</legend>
-                            <div className="flex mt-2">
-                              <div className="mr-8">
-                                {
-                                  timeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      value={t.value}
-                                      checked={timeUnit === t.value}
-                                      onChange={handleTimeUnit}
-                                      required
-                                      className="form-radio"
-                                      name="radio-direct" />
-                                    <span className="ml-2 mr-8">{t.name}</span>
-                                  </label>)
-                                }
+                                placeholder="number only"
+                              />
+                            </label>
+                            <fieldset className="block ml-8">
+                              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Unit</legend>
+                              <div className="flex mt-2">
+                                <div className="mr-8">
+                                  {
+                                    timeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
+                                      <input
+                                        type="radio"
+                                        value={t.value}
+                                        checked={t.value === timeUnit}
+                                        onChange={handleTimeUnit}
+                                        required
+                                        className="form-radio"
+                                        name="radio-direct" />
+                                      <span className="ml-2 mr-8">{t.name}</span>
+                                    </label>)
+                                  }
+                                </div>
                               </div>
-                            </div>
-                          </fieldset>
-                        </div>
-                        {
-                          // (timeLengthError === null && timeUnitError === null)
-                          //   ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
-                          (timeLengthError === false && timeUnitError === false)
-                            ? <div className="block h-6" />
-                            : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
-                        }
-                      </div>
-                      {/* general area tags */}
-                      <div className="mt-8">
-                        <fieldset className="block">
-                          <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                            Area Tags</legend>
-                          <div className="flex mt-1">
-                            {
-                              areaTags.map((t) => <div key={t.name} className="mr-8">
-                                <label className="inline-flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    value={t.name}
-                                    checked={t.checked}
-                                    onChange={e => handleAreaTag(e, t.id)}
-                                    required
-                                    className="form-checkbox" />
-                                  <span className="ml-2">
-                                    {t.name}
-                                  </span>
-                                </label>
-                              </div>)
-                            }
+                            </fieldset>
                           </div>
                           {
-                            areaTagError === null
+                            // (timeLengthError === null && timeUnitError === null)
+                            //   ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
+                            (timeLengthError === false && timeUnitError === false)
                               ? <div className="block h-6" />
-                              : areaTagError
-                                ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
-                                : <div className="block h-6" />
+                              : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
                           }
-                        </fieldset>
-                      </div>
-                    </div>
-                    {/* Departure */}
-                    <div>
-                      <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
-                        Departure
-                      </div>
-                      <div className="mt-8 pl-4">
-                        <ProvinceCity
-                          defaultProvince={departPro}
-                          defaultCity={departCity}
-                          provinceList={regions}
-                          province={departPro}
-                          cityList={cityList}
-                          city={departCity}
-                          handleProvince={handleDepartProvince}
-                          handleCity={handleCity}
-                        />
-                        {
-                          departProError
-                            ? <span className='text-xs text-pink-500'>Please select a Province</span>
-                            : <div className="block h-6" />
-                        }
-                      </div>
-                    </div>
-                    {/* Desitinations */}
-                    <div>
-                      <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
-                        Destinations
-                      </div>
-                      <div className='p-4'>
-                        {
-                          destinations?.map((d: DestinationProp, index: number) => <div
-                            key={`${index}+${d.spotName}`}
-                            className='flex justify-between mt-2 hover:text-indigo-500'>
-                            <div className='w-96 overflow-hidden'>
-                              <span>{d.spotName}</span>
+                        </div>
+                        {/* general area tags */}
+                        <div className="mt-8">
+                          <fieldset className="block">
+                            <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                              Area Tags</legend>
+                            <div className="flex mt-1">
+                              {
+                                areaTags.map((t) => <div key={t.name} className="mr-8">
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value={t.name}
+                                      checked={t.checked}
+                                      onChange={e => handleAreaTag(e, t.id)}
+                                      required
+                                      className="form-checkbox" />
+                                    <span className="ml-2">
+                                      {t.name}
+                                    </span>
+                                  </label>
+                                </div>)
+                              }
                             </div>
-                            <div>
-                              <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id)}>
-                                <span className='text-indigo-500 text-xs'>more</span>
-                              </button>
-                            </div>
-                          </div>)
-                        }
+                            {
+                              areaTagError === null
+                                ? <div className="block h-6" />
+                                : areaTagError
+                                  ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
+                                  : <div className="block h-6" />
+                            }
+                          </fieldset>
+                        </div>
                       </div>
-                      {/* add desitination button */}
-                      <div className="mt-4">
-                        <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
-                          Add Desitination
-                        </button>
-                        <div>
+                      {/* Departure */}
+                      <div>
+                        <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
+                          Departure
+                        </div>
+                        <div className="mt-8 pl-4">
+                          <ProvinceCity
+                            defaultProvince={departPro}
+                            defaultCity={departCity}
+                            provinceList={regions}
+                            province={departPro}
+                            cityList={cityList}
+                            city={departCity}
+                            handleProvince={handleDepartProvince}
+                            handleCity={handleCity}
+                          />
                           {
-                            destinationError
-                              ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
+                            departProError
+                              ? <span className='text-xs text-pink-500'>Please select a Province</span>
                               : <div className="block h-6" />
                           }
                         </div>
                       </div>
-                      {/* add destination */}
-                      {
-                        showCreateDest && <CreateDestination
-                          handleCloseDestination={handleCloseDestination}
-                          createSpotId={createSpotId}
-                          createSpotName={createSpotName}
-                          createSpotNameError={createSpotNameError}
-                          handleCreateSpotName={handleCreateSpotName}
-                          createDestPro={createDestPro}
-                          createDestProError={createDestProError}
-                          handleCreateDestProvince={handleCreateDestProvince}
-                          createDestCity={createDestCity}
-                          handleCreateDestCity={handleCreateDestCity}
-                          createCityList={createCityList}
-                          createFeatures={createFeatures}
-                          createFeaturesError={createFeaturesError}
-                          handleCreateFeature={handleCreateFeature}
-                          createActivities={createActivities}
-                          createActivitiesError={createActivitiesError}
-                          handleCreateActivity={handleCreateActivity}
-                          handleCreateDestination={handleCreateDestination}
-                        />
-                      }
-                      {/* edit destination */}
-                      {
-                        showUpdateDest && <UpdateDestination
-                          handleCloseUpdateDestination={handleCloseUpdateDestination}
-                          updateSpotId={updateSpotId}
-                          updateSpotName={updateSpotName}
-                          updateSpotNameError={updateSpotNameError}
-                          handleUpdateSpotName={handleUpdateSpotName}
-                          updateDestPro={updateDestPro}
-                          updateDestProError={updateDestProError}
-                          handleUpdateDestProvince={handleUpdateDestProvince}
-                          updateDestCity={updateDestCity}
-                          handleUpdateDestCity={handleUpdateDestCity}
-                          updateCityList={updateCityList}
-                          updateFeatures={updateFeatures}
-                          updateFeaturesError={updateFeaturesError}
-                          handleUpdateFeature={handleUpdateFeature}
-                          updateActivities={updateActivities}
-                          updateActivitiesError={updateActivitiesError}
-                          handleUpdateActivity={handleUpdateActivity}
-                          handleUpdateDestination={handleUpdateDestination}
-                          handleDeleteDestination={handleDeleteDestination}
-                        />
-                      }
-                    </div>
-                  </div>
-                }
-                {/* Main content Tab */}
-                {
-                  tab === 'main' && <div>
-                    {/* Main content */}
-                    <div>
-                      <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
-                        Content
+                      {/* Desitinations */}
+                      <div>
+                        <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
+                          Destinations
+                        </div>
+                        <div className='p-4'>
+                          {
+                            destinations?.map((d: DestinationProp, index: number) => <div
+                              key={`${index}+${d.spotName}`}
+                              className='flex justify-between mt-2 hover:text-indigo-500'>
+                              <div className='w-96 overflow-hidden'>
+                                <span>{d.spotName}</span>
+                              </div>
+                              <div>
+                                <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id)}>
+                                  <span className='text-indigo-500 text-xs'>more</span>
+                                </button>
+                              </div>
+                            </div>)
+                          }
+                        </div>
+                        {/* add desitination button */}
+                        <div className="mt-4">
+                          <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
+                            Add Desitination
+                          </button>
+                          <div>
+                            {
+                              destinationError
+                                ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
+                                : <div className="block h-6" />
+                            }
+                          </div>
+                        </div>
+                        {/* add destination */}
+                        {
+                          showCreateDest && <CreateDestination
+                            handleCloseDestination={handleCloseDestination}
+                            createSpotId={createSpotId}
+                            createSpotName={createSpotName}
+                            createSpotNameError={createSpotNameError}
+                            handleCreateSpotName={handleCreateSpotName}
+                            createDestPro={createDestPro}
+                            createDestProError={createDestProError}
+                            handleCreateDestProvince={handleCreateDestProvince}
+                            createDestCity={createDestCity}
+                            handleCreateDestCity={handleCreateDestCity}
+                            createCityList={createCityList}
+                            createFeatures={createFeatures}
+                            createFeaturesError={createFeaturesError}
+                            handleCreateFeature={handleCreateFeature}
+                            createActivities={createActivities}
+                            createActivitiesError={createActivitiesError}
+                            handleCreateActivity={handleCreateActivity}
+                            handleCreateDestination={handleCreateDestination}
+                          />
+                        }
+                        {/* edit destination */}
+                        {
+                          showUpdateDest && <UpdateDestination
+                            handleCloseUpdateDestination={handleCloseUpdateDestination}
+                            updateSpotId={updateSpotId}
+                            updateSpotName={updateSpotName}
+                            updateSpotNameError={updateSpotNameError}
+                            handleUpdateSpotName={handleUpdateSpotName}
+                            updateDestPro={updateDestPro}
+                            updateDestProError={updateDestProError}
+                            handleUpdateDestProvince={handleUpdateDestProvince}
+                            updateDestCity={updateDestCity}
+                            handleUpdateDestCity={handleUpdateDestCity}
+                            updateCityList={updateCityList}
+                            updateFeatures={updateFeatures}
+                            updateFeaturesError={updateFeaturesError}
+                            handleUpdateFeature={handleUpdateFeature}
+                            updateActivities={updateActivities}
+                            updateActivitiesError={updateActivitiesError}
+                            handleUpdateActivity={handleUpdateActivity}
+                            handleUpdateDestination={handleUpdateDestination}
+                            handleDeleteDestination={handleDeleteDestination}
+                          />
+                        }
                       </div>
-                      {/* editor */}
-                      <div className='mt-8 pb-8'>
-                        <ReactQuill
-                          className='mb-8 h-64'
-                          theme='snow'
-                          value={editorValue}
-                          onChange={setEditorValue}
-                          modules={QuillModules}
-                          formats={QuillFormats}
-                        />
-                      </div>
                     </div>
-                  </div>
-                }
-                {/* submit Button */}
-                <div className="flex justify-between mt-12">
-                  <button
-                    className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
-                    onClick={handleDelete}>
-                    Delete
-                  </button>
-                  <div>
+                  }
+                  {/* Main content Tab */}
                   {
-                      postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          value={s.value}
-                          onChange={handlePostState}
-                          checked={s.value === 'offline'}
-                          required
-                          className="form-radio"
-                          name="radio-direct" />
-                        <span className="ml-2 mr-8">{s.name}</span>
-                      </label>)
-                    }
+                    tab === 'main' && <div>
+                      {/* Main content */}
+                      <div>
+                        <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
+                          Content
+                        </div>
+                        {/* editor */}
+                        <div className='mt-8 pb-8'>
+                          <ReactQuill
+                            className='mb-8 h-64'
+                            theme='snow'
+                            value={editorValue}
+                            onChange={setEditorValue}
+                            modules={QuillModules}
+                            formats={QuillFormats}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  {/* submit Button */}
+                  <div className="flex justify-between mt-12">
                     <button
-                      className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                      onClick={handleSubmit}>
-                      Submit
+                      className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
+                      onClick={handleDelete}>
+                      Delete
                     </button>
+                    <div>
+                      {
+                        postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            value={s.value}
+                            onChange={handlePostState}
+                            checked={s.value === fileType}
+                            required
+                            className="form-radio"
+                            name="radio-direct" />
+                          <span className="ml-2 mr-8">{s.name}</span>
+                        </label>)
+                      }
+                      <button
+                        className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
+                        onClick={handleSubmit}>
+                        Submit
+                      </button>
+                    </div>
                   </div>
                 </div>
+                {/* submitted, waiting for result */}
+                {
+                  loading && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <span className='ml-4'>Loading</span>
+                  </div>
+                }
+                {/* got updaate response, fail alert */}
+                {
+                  updateSuccess === false && <div className='flex p-4 w-1/2 rounded bg-red-400 z-10 fixed top-10'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <p className="ml-4 text-white">Failed: {updateNotice}</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                }
+                {/* got updaate response, succeeded notification */}
+                {
+                  updateSuccess === true && <div className='flex p-4 w-1/2 rounded bg-emerald-500 z-10 fixed top-10'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="ml-4 text-white">Updated successfully</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                }
+                {/* got delete response, succeeded notification */}
+                {
+                  deleteSuccess === true && <div className='flex p-4 w-1/2 rounded bg-emerald-500 z-10 fixed top-10'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="ml-4 text-white">Deleted successfully</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                }
               </div>
-            </div>
+              : <div className='flex h-96 justify-center items-center'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="red" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span className='ml-2'>Error: {loadingPostError}</span>
+              </div>
         }
-
       </div>
     </MainLayout>
   )
