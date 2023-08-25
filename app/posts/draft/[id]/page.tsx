@@ -158,8 +158,6 @@ export default function EditDraftPost() {
     e.target.validity.valid ? setTimeLengthError(false) : setTimeLengthError(true)
   }
   const [timeUnit, setTimeUnit] = useState('')
-  console.log('timeUnit: ', timeUnit)
-  console.log('timeUnits: ', timeUnits)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
@@ -450,6 +448,7 @@ export default function EditDraftPost() {
   const [loadingError, setLoadingError] = useState(null)
   const [updateNotice, setUpdateNotice] = useState('')
   const [updateSuccess, setUpdateSuccess] = useState<boolean | null>(null)
+  const [deleteComfirm, setDeleteComfirm] = useState(false)
   const [deleteSuccess, setDeleteSuccess] = useState<boolean | null>(null)
   const validationPost = () => {
     titleValidation || setTitleError(true)
@@ -633,8 +632,6 @@ export default function EditDraftPost() {
                             </fieldset>
                           </div>
                           {
-                            // (timeLengthError === null && timeUnitError === null)
-                            //   ? <span className='text-xs text-slate-500'>Please input a number, less than 1000, and select a unit</span>
                             (timeLengthError === false && timeUnitError === false)
                               ? <div className="block h-6" />
                               : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
@@ -806,7 +803,7 @@ export default function EditDraftPost() {
                   <div className="flex justify-between mt-12">
                     <button
                       className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
-                      onClick={handleDelete}>
+                      onClick={() => setDeleteComfirm(true)}>
                       Delete
                     </button>
                     <div>
@@ -862,6 +859,27 @@ export default function EditDraftPost() {
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6 ml-auto">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
+                  </div>
+                }
+                {
+                  deleteComfirm && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
+                    <div className="p-8 rounded bg-white w-80 h-40">
+                      <span>
+                        Comfirm to delete?
+                      </span>
+                      <div className="flex mt-8 justify-between">
+                        <button className="rounded py-2 px-4 h-10 bg-red-600" onClick={handleDelete}>
+                          <span className="text-white">
+                            Delete
+                          </span>
+                        </button>
+                        <button className="rounded py-2 px-4 h-10 border border-slate-500 bg-white" onClick={() => setDeleteComfirm(false)}>
+                          <span className="text-slate-700">
+                            Cancel
+                          </span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 }
                 {/* got delete response, succeeded notification */}
