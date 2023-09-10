@@ -45,8 +45,8 @@ export interface PostProp {
   length: string
   unit: string
   areaTags: string[]
-  departProvince: string
-  departCity: string
+  departProvince: string | undefined
+  departCity: string | undefined
   destinations: DestinationProp[]
 }
 const defaultTags = [
@@ -628,9 +628,9 @@ export default function CreatePost() {
                       defaultProvince=''
                       defaultCity=''
                       provinceList={regions}
-                      province={departPro}
+                      // province={departPro}
                       cityList={cityList}
-                      city={departCity}
+                      // city={departCity}
                       handleProvince={handleDepartProvince}
                       handleCity={handleCity}
                     />

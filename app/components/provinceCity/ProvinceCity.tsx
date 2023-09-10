@@ -6,19 +6,19 @@ export default function ProvinceCity(
     defaultProvince: string
     defaultCity: string
     provinceList: string[]
-    province: string
+    // province: string
     cityList: CityProp[]
-    city: string
+    // city: string
     handleProvince: (e: ChangeEvent<HTMLSelectElement>) => void
     handleCity: (e: ChangeEvent<HTMLSelectElement>) => void
   }) {
   const defaultProvince = props.defaultProvince
   const defaultCity = props.defaultCity
-  const province = props.province
+  // const province = props.province
   const provinceList = props.provinceList
   const cityList = props.cityList
   const handleProvince = props.handleProvince
-  const city = props.city
+  // const city = props.city
   const handleCity = props.handleCity
 
   return (
@@ -51,11 +51,12 @@ export default function ProvinceCity(
           className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
               focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
           {
-            cityList.map((item: { province: string, city: string }, index: number) => <option
-              key={`${index}+${item.province}+${item.city}`}
-              value={item.city}>
-              {item.city}
-            </option>)
+            cityList.map((item: { province: string, city: string }, index: number) =>
+              <option
+                key={`${index}+${item.province}+${item.city}`}
+                value={item.city}>
+                {item.city}
+              </option>)
           }
         </select>
       </label>

@@ -75,7 +75,7 @@ const postStates = [
   }
 ]
 
-export default function EditDraftPost() {
+function EditDraftPost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
   const cities = canada.cities.map((cityData: string[]) => ({
@@ -680,9 +680,9 @@ export default function EditDraftPost() {
                             defaultProvince={departPro}
                             defaultCity={departCity}
                             provinceList={regions}
-                            province={departPro}
+                            // province={departPro}
                             cityList={cityList}
-                            city={departCity}
+                            // city={departCity}
                             handleProvince={handleDepartProvince}
                             handleCity={handleCity}
                           />

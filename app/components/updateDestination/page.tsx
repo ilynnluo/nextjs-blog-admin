@@ -98,9 +98,9 @@ export default function UpdateDestination(
               defaultProvince={updateDestPro}
               defaultCity={updateDestCity}
               provinceList={regions}
-              province={updateDestPro}
+              // province={updateDestPro}
               cityList={updateCityList}
-              city={updateDestCity}
+              // city={updateDestCity}
               handleProvince={handleUpdateDestProvince}
               handleCity={handleUpdateDestCity}
             />
