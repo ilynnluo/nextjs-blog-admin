@@ -11,7 +11,9 @@ import { CityProp, FileType, DestinationProp, PostProp } from '../create/page';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
-import { getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTags, selectPostAreaTagsArray, selectPostTimeUnit } from '../../redux/postSlice'
+import {
+  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostDepartProvince
+} from '../../redux/postSlice'
 import { Provider } from 'react-redux';
 import {store} from '../../redux/store'
 
@@ -108,7 +110,6 @@ function CreatePost() {
   const getPostError = useAppSelector(selectGetPostError)
   const params = useParams()
   const postId = params.id as string
-  const [cityList, setCityList] = useState<CityProp[]>([])
   const [destinations, setDestinations] = useState<DestinationProp[]>([])
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   // const getPost = async () => {
@@ -165,9 +166,7 @@ function CreatePost() {
     setTimeUnitValidation(e.target.validity.valid)
     e.target.validity.valid ? setTimeUnitError(false) : setTimeUnitError(true)
   }
-  console.log('postAreaTagsArray: ', postAreaTagsArray)
   const [areaTags, setAreaTags] = useState(postAreaTagsArray)
-  console.log('areaTags: ', areaTags)
   const [checkedTags, setCheckedTags] = useState<string[]>(postAreaTags)
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(true)
@@ -188,9 +187,17 @@ function CreatePost() {
     setAreaTagValidation(isCheced)
     isCheced ? setAreaTagError(false) : setAreaTagError(true)
   }
+  const postDepartProvince = useAppSelector(selectPostDepartProvince)
   const [departPro, setDepartPro] = useState('')
   const [departProvinceValidation, setDepartProvinceValidation] = useState(true)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
+  useEffect(() => {
+    setCityList(cities.filter((city: { city: string, province: string }) => city.province === postDepartProvince))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postDepartProvince])
+  const [cityList, setCityList] = useState<CityProp[] | undefined>([])
+  console.log('postDepartProvince: ', postDepartProvince)
+  console.log('city list: ', cityList)
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
   const handleDepartProvince = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -649,7 +656,7 @@ return (
                     </div>
                     <div className="mt-8 pl-4">
                       <ProvinceCity
-                        defaultProvince={departPro}
+                        defaultProvince={postDepartProvince}
                         defaultCity={departCity}
                         provinceList={regions}
                         // province={departPro}

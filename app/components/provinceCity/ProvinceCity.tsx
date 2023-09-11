@@ -3,11 +3,11 @@ import { CityProp } from "@/app/posts/create/page"
 
 export default function ProvinceCity(
   props: {
-    defaultProvince: string
+    defaultProvince: string | undefined
     defaultCity: string
     provinceList: string[]
     // province: string
-    cityList: CityProp[]
+    cityList: CityProp[] | undefined
     // city: string
     handleProvince: (e: ChangeEvent<HTMLSelectElement>) => void
     handleCity: (e: ChangeEvent<HTMLSelectElement>) => void
@@ -51,7 +51,7 @@ export default function ProvinceCity(
           className="block w-48 mt-1 rounded-none  border-gray-300 shadow-sm text-sm text-slate-500
               focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
           {
-            cityList.map((item: { province: string, city: string }, index: number) =>
+            cityList?.map((item: { province: string, city: string }, index: number) =>
               <option
                 key={`${index}+${item.province}+${item.city}`}
                 value={item.city}>

@@ -50,7 +50,6 @@ export const getPost = createAsyncThunk('post/getPost', async (params: { postId:
   // why don't use try() catch()
   const postId = params.postId
   const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
-  console.log('response in PostSlice: ', response)
   return response
 })
 
@@ -66,7 +65,6 @@ export const postSlice = createSlice({
       .addCase(getPost.fulfilled, (state, action) => {
         state.loading = false
         state.post = action.payload
-        console.log('payload: ', action.payload)
       })
       .addCase(getPost.rejected, (state, action) => {
         state.loading = false
@@ -76,7 +74,8 @@ export const postSlice = createSlice({
 })
 
 // export const { } = postSlice.actions
-
+export const selectGetPostLoading = (state: RootState) => state.post.loading
+export const selectGetPostError = (state: RootState) => state.post.error
 export const selectPost = (state: RootState) => state.post.post
 export const selectPostTimeUnit = (state: RootState) => state.post.post.unit
 export const selectPostTags = (state: RootState) => state.post.post.areaTags
@@ -90,10 +89,8 @@ export const selectPostAreaTagsArray = (state: RootState) => {
     }
     return t
   })
-  console.log('redux slice - checked tags: ', getCheckedAreaTags)
   return getCheckedAreaTags
 }
-export const selectGetPostLoading = (state: RootState) => state.post.loading
-export const selectGetPostError = (state: RootState) => state.post.error
+export const selectPostDepartProvince = (state: RootState) => state.post.post.departProvince
 
 export default postSlice.reducer
