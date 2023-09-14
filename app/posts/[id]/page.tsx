@@ -12,7 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostDepartProvince, selectPostDestinations
+  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
+  selectPostDepartProvince, selectPostDestinations, selectPostFileType
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
 import {store} from '../../redux/store'
@@ -156,6 +157,10 @@ function EditPost() {
   }
   const postTimeUnit = useAppSelector(selectPostTimeUnit)
   const [timeUnit, setTimeUnit] = useState('')
+  useEffect(() => {
+    setTimeUnit(postTimeUnit)
+  }, [postTimeUnit])
+  console.log('postTimeUnit: ', postTimeUnit, ' + unit: ', timeUnit)
   const [timeUnitArray, setTimeArray] = useState(defaultTimeUnits)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
@@ -427,7 +432,6 @@ function EditPost() {
     updateDestProValidation || setUpdateDestProError(true)
     updateFeatureValidation || setUpdateFeaturesError(true)
     updateActivityValidation || setUpdateActivitiesError(true)
-    Object.freeze(destinations)
     const copyDestinations = [...destinations]
     const updatingDest = copyDestinations.find((d) => d.id === id) as DestinationProp
     const getIndex = () => copyDestinations.findIndex((d) => d.id === id)
@@ -460,6 +464,10 @@ function EditPost() {
   }
   // submit
   const [createResult, setCreateResult] = useState(false)
+  const postFileType = useAppSelector(selectPostFileType)
+  useEffect(() => {
+    setFileType(postFileType)
+  }, [postFileType])
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
   const validationPost = () => {
@@ -606,7 +614,7 @@ return (
                                   <input
                                     type="radio"
                                     value={t.value}
-                                    checked={t.value === postTimeUnit}
+                                    checked={t.value === timeUnit}
                                     onChange={handleTimeUnit}
                                     required
                                     className="form-radio"

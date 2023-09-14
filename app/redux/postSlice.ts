@@ -50,7 +50,6 @@ export const getPost = createAsyncThunk('post/getPost', async (params: { postId:
   // why don't use try() catch()
   const postId = params.postId
   const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
-  console.log('slice response: ', response)
   return response
 })
 
@@ -93,5 +92,6 @@ export const selectPostAreaTagsArray = (state: RootState) => {
 }
 export const selectPostDepartProvince = (state: RootState) => state.post.post.departProvince
 export const selectPostDestinations = (state: RootState) => state.post.post.destinations
+export const selectPostFileType = (state: RootState) => state.post.post.fileType
 
 export default postSlice.reducer
