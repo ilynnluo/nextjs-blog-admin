@@ -75,7 +75,7 @@ const postStates = [
   }
 ]
 
-function EditDraftPost() {
+export default function EditDraftPost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
   const cities = canada.cities.map((cityData: string[]) => ({
@@ -522,6 +522,7 @@ function EditDraftPost() {
     deletePost()
   }
   useEffect(() => {
+    console.log('loading draft >>>>>>> ')
     getPost()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

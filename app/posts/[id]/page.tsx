@@ -12,13 +12,12 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostDepartProvince
+  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostDepartProvince, selectPostDestinations
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
 import {store} from '../../redux/store'
 
 var canada = require('canada')
-
 
 const defaultFeatures = [
   {
@@ -68,7 +67,7 @@ const postStates = [
     value: 'published'
   }
 ]
-function CreatePost() {
+function EditPost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
   const cities = canada.cities.map((cityData: string[]) => ({
@@ -110,7 +109,6 @@ function CreatePost() {
   const getPostError = useAppSelector(selectGetPostError)
   const params = useParams()
   const postId = params.id as string
-  const [destinations, setDestinations] = useState<DestinationProp[]>([])
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   // const getPost = async () => {
   //   try {
@@ -196,8 +194,6 @@ function CreatePost() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postDepartProvince])
   const [cityList, setCityList] = useState<CityProp[] | undefined>([])
-  console.log('postDepartProvince: ', postDepartProvince)
-  console.log('city list: ', cityList)
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
   const handleDepartProvince = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -287,6 +283,11 @@ function CreatePost() {
     setCreateActivityValidation(isChecked)
     isChecked ? setCreateActivitiesError(false) : setCreateActivitiesError(true)
   }
+  const postDestinations = useAppSelector(selectPostDestinations)
+  const [destinations, setDestinations] = useState<DestinationProp[]>([])
+  useEffect(() => {
+    setDestinations(postDestinations)
+  }, [postDestinations])
   const [destinationValidation, setDestinationValidation] = useState(true)
   const [destinationError, setDestinationError] = useState<boolean | null>(null)
   const handleCreateDestination = () => {
@@ -426,14 +427,21 @@ function CreatePost() {
     updateDestProValidation || setUpdateDestProError(true)
     updateFeatureValidation || setUpdateFeaturesError(true)
     updateActivityValidation || setUpdateActivitiesError(true)
+    Object.freeze(destinations)
     const copyDestinations = [...destinations]
-    const updatingDest: DestinationProp | undefined = copyDestinations.find((d) => d.id === id)
-    if (destStatesValidations.every(d => d === true) && updatingDest !== undefined) {
-      updatingDest.spotName = updateSpotName
-      updatingDest.spotProvince = updateDestPro
-      updatingDest.spotCity = updateDestCity
-      updatingDest.spotFeatures = checkedUpdateFeatures
-      updatingDest.spotActivities = checkedUpdateActivities
+    const updatingDest = copyDestinations.find((d) => d.id === id) as DestinationProp
+    const getIndex = () => copyDestinations.findIndex((d) => d.id === id)
+    const copyUpdatingDest = {...updatingDest}
+    if (destStatesValidations.every(d => d === true) && copyUpdatingDest !== undefined) {
+      copyUpdatingDest.spotName = updateSpotName
+      copyUpdatingDest.spotProvince = updateDestPro
+      copyUpdatingDest.spotCity = updateDestCity
+      copyUpdatingDest.spotFeatures = checkedUpdateFeatures
+      copyUpdatingDest.spotActivities = checkedUpdateActivities
+      console.log('copyUpdatingDest: ', copyUpdatingDest)
+      copyDestinations.splice(getIndex(), 0, copyUpdatingDest)
+      copyDestinations.splice(getIndex()+1, 1)
+      console.log('copyDestinations: ', copyDestinations)
       setDestinations(copyDestinations)
       handleCloseUpdateDestination()
     }
@@ -819,10 +827,10 @@ return (
 )
 }
 
-export default function CreatePostProvider() {
+export default function EditPostProvider() {
   return (
     <Provider store={store}>
-      <CreatePost />
+      <EditPost />
     </Provider>
   )
 }
