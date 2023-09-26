@@ -3,7 +3,7 @@ import type { RootState } from '../redux/store'
 import { DestinationProp, FileType, PostProp } from '../posts/create/page'
 import axios from 'axios'
 
-export interface GetPostState {
+export interface PostState {
   post: {
     id: string,
     fileType: FileType | null
@@ -17,9 +17,10 @@ export interface GetPostState {
   }
   loading: boolean
   error: any
+  updateLoading: boolean
+  updateError: any
 }
-
-const initialState: GetPostState = {
+const initialState: PostState = {
   post: {
     id: '',
     fileType: null,
@@ -32,7 +33,9 @@ const initialState: GetPostState = {
     destinations: []
   },
   loading: true,
-  error: null
+  error: null,
+  updateLoading: false,
+  updateError: null
 }
 const defaultTags = [
   {
@@ -53,6 +56,14 @@ export const getPost = createAsyncThunk('post/getPost', async (params: { postId:
   return response
 })
 
+export const updatePost = createAsyncThunk('post/updatePost', async (params: { postId: string, updatingPost: PostProp }) => {
+  const postId = params.postId
+  const updatingPost = params.updatingPost
+  const { data: response } = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
+  console.log('redux update response: ', response)
+  return response
+})
+
 export const postSlice = createSlice({
   name: 'post',
   initialState,
@@ -69,6 +80,16 @@ export const postSlice = createSlice({
       .addCase(getPost.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message
+      })
+      .addCase(updatePost.pending, (state) => {
+        state.updateLoading = true
+      })
+      .addCase(updatePost.fulfilled, (state) => {
+        state.updateLoading = false
+      })
+      .addCase(updatePost.rejected, (state, action) => {
+        state.updateLoading = false
+        state.updateError = action.error.message
       })
   }
 })
@@ -93,5 +114,7 @@ export const selectPostAreaTagsArray = (state: RootState) => {
 export const selectPostDepartProvince = (state: RootState) => state.post.post.departProvince
 export const selectPostDestinations = (state: RootState) => state.post.post.destinations
 export const selectPostFileType = (state: RootState) => state.post.post.fileType
+export const selectPostUpdateLoading = (state: RootState) => state.post.updateLoading
+export const selectPostUpdateError = (state: RootState) => state.post.updateError
 
 export default postSlice.reducer

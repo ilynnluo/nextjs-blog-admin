@@ -12,8 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
-  selectPostDepartProvince, selectPostDestinations, selectPostFileType
+  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
+  selectPostDepartProvince, selectPostDestinations, selectPostFileType, selectPostUpdateLoading, selectPostUpdateError
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
 import {store} from '../../redux/store'
@@ -97,7 +97,6 @@ function EditPost() {
   const dispatch = useAppDispatch()
   useEffect(() => {
     dispatch(getPost({ postId }))
-    console.log(" >>>>>>>>>>>>>>> ")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const post = useAppSelector(selectPost)
@@ -111,34 +110,6 @@ function EditPost() {
   const params = useParams()
   const postId = params.id as string
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
-  // const getPost = async () => {
-  //   try {
-  //     const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
-  //     setTitle(response.title)
-  //     setFileType(response.fileType)
-  //     setLength(response.length)
-  //     setTimeUnit(response.unit)
-  //     setCheckedTags(response.areaTags)
-  //     // get checked ara tags as default
-  //     getCheckedAreaTags = defaultTags.map(t => {
-  //       if (response.areaTags.find((c: string) => c === t.name)) {
-  //         return {
-  //           ...t,
-  //           checked: true
-  //         }
-  //       }
-  //       return t
-  //     })
-  //     setAreaTags(getCheckedAreaTags)
-  //     setDepartPro(response.departProvince)
-  //     setDepartCity(response.departCity)
-  //     setDestinations(response.destinations)
-  //     setCityList(cities.filter((city: { city: string, province: string }) => city.province === response.departProvince))
-  //     setLoadingPost(false)
-  //   } catch (e: any) {
-  //     console.log('error: ', e.message)
-  //   }
-  // }
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
@@ -160,7 +131,6 @@ function EditPost() {
   useEffect(() => {
     setTimeUnit(postTimeUnit)
   }, [postTimeUnit])
-  console.log('postTimeUnit: ', postTimeUnit, ' + unit: ', timeUnit)
   const [timeUnitArray, setTimeArray] = useState(defaultTimeUnits)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
@@ -494,22 +464,25 @@ function EditPost() {
     departCity: departCity,
     destinations: destinations
   }
-  const updatePost = async () => {
-    try {
-      const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
-      if (response.status === 200) {
-        setCreateResult(true)
-      }
-    } catch (e: any) {
-      console.log('post api error: ', e.message)
-    }
-  }
+  const postUpdateLoading = useAppSelector(selectPostUpdateLoading)
+  const postUpdateError = useAppSelector(selectPostUpdateError)
+  // const updatePost = async () => {
+  //   try {
+  //     const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
+  //     if (response.status === 200) {
+  //       setCreateResult(true)
+  //     }
+  //   } catch (e: any) {
+  //     console.log('post api error: ', e.message)
+  //   }
+  // }
 
   const handleSubmit = () => {
+    console.log('updating Post: ', updatingPost)
     setLoading(true)
     switch (fileType) {
-      case 'offline': updatePost(); break;
-      case 'published': validationPost() && updatePost(); break;
+      case 'offline': dispatch(updatePost({ postId, updatingPost })); break;
+      case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
     }
   }
   const handleDelete = () => {
@@ -815,11 +788,6 @@ return (
                       <span className="ml-2 mr-8">{s.name}</span>
                     </label>)
                   }
-                  {/* <button
-                      className="py-2 px-4 bg-white text-emerald-500 rounded border border-emerald-500"
-                      onClick={handleSave}>
-                      Save
-                    </button> */}
                   <button
                     className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
                     onClick={handleSubmit}>
