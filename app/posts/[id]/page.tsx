@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
+  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
   selectPostDepartProvince, selectPostDestinations, selectPostFileType, selectPostUpdateLoading, selectPostUpdateError
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
@@ -110,7 +110,10 @@ function EditPost() {
   const params = useParams()
   const postId = params.id as string
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
+  const postTitle = useAppSelector(selectPostTitle)
   const [title, setTitle] = useState('')
+  useEffect(() => setTitle(postTitle), [postTitle])
+  console.log('title: ', title)
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {

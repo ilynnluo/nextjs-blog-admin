@@ -97,6 +97,7 @@ export const postSlice = createSlice({
 export const selectGetPostLoading = (state: RootState) => state.post.loading
 export const selectGetPostError = (state: RootState) => state.post.error
 export const selectPost = (state: RootState) => state.post.post
+export const selectPostTitle = (state: RootState) => state.post.post.title
 export const selectPostTimeUnit = (state: RootState) => state.post.post.unit
 export const selectPostTags = (state: RootState) => state.post.post.areaTags
 export const selectPostAreaTagsArray = (state: RootState) => {
