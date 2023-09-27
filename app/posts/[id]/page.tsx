@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray,
+  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostLength, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostAreaTags,
   selectPostDepartProvince, selectPostDestinations, selectPostFileType, selectPostUpdateLoading, selectPostUpdateError
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
@@ -102,9 +102,7 @@ function EditPost() {
   const post = useAppSelector(selectPost)
   const postAreaTags = useAppSelector(selectPostTags)
   const postAreaTagsArray = useAppSelector(selectPostAreaTagsArray)
-  useEffect(() => {
-    setAreaTags(postAreaTagsArray)
-  }, [postAreaTagsArray])
+  // const postAreaTagsMemo = selectPostAreaTags(post)
   const getPostLoading = useAppSelector(selectGetPostLoading)
   const getPostError = useAppSelector(selectGetPostError)
   const params = useParams()
@@ -112,8 +110,6 @@ function EditPost() {
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   const postTitle = useAppSelector(selectPostTitle)
   const [title, setTitle] = useState('')
-  useEffect(() => setTitle(postTitle), [postTitle])
-  console.log('title: ', title)
   const [titleError, setTitleError] = useState<null | boolean>(false)
   const [titleValidation, setTitleValidation] = useState(true)
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
@@ -121,6 +117,7 @@ function EditPost() {
     setTitleValidation(e.target.validity.valid)
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
   }
+  const postLength =  useAppSelector(selectPostLength)
   const [length, setLength] = useState('')
   const [timeLengthError, setTimeLengthError] = useState(false)
   const [timeLengthValidation, setTimeLengthValidation] = useState(true)
@@ -131,9 +128,6 @@ function EditPost() {
   }
   const postTimeUnit = useAppSelector(selectPostTimeUnit)
   const [timeUnit, setTimeUnit] = useState('')
-  useEffect(() => {
-    setTimeUnit(postTimeUnit)
-  }, [postTimeUnit])
   const [timeUnitArray, setTimeArray] = useState(defaultTimeUnits)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
@@ -167,10 +161,6 @@ function EditPost() {
   const [departPro, setDepartPro] = useState('')
   const [departProvinceValidation, setDepartProvinceValidation] = useState(true)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
-  useEffect(() => {
-    setCityList(cities.filter((city: { city: string, province: string }) => city.province === postDepartProvince))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postDepartProvince])
   const [cityList, setCityList] = useState<CityProp[] | undefined>([])
   const [departCity, setDepartCity] = useState('')
   let defaultDepartCity
@@ -439,8 +429,14 @@ function EditPost() {
   const [createResult, setCreateResult] = useState(false)
   const postFileType = useAppSelector(selectPostFileType)
   useEffect(() => {
+    setTitle(postTitle)
+    setLength(postLength)
+    setTimeUnit(postTimeUnit)
+    setAreaTags(postAreaTagsArray)
+    setCityList(cities.filter((city: { city: string, province: string }) => city.province === postDepartProvince))
     setFileType(postFileType)
-  }, [postFileType])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postTitle, postLength, postTimeUnit, postAreaTagsArray, postDepartProvince, postFileType])
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
   const validationPost = () => {
