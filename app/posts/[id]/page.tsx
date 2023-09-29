@@ -158,9 +158,7 @@ function EditPost() {
   }
   // depart province
   const postDepartProvince = useAppSelector(selectPostDepartProvince)
-  console.log('postDepartProvince: ', postDepartProvince)
   const [departPro, setDepartPro] = useState(postDepartProvince)
-  console.log('departPro: ', departPro)
   const [departProvinceValidation, setDepartProvinceValidation] = useState(true)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
   const [cityList, setCityList] = useState<CityProp[] | undefined>([])
@@ -427,7 +425,6 @@ function EditPost() {
   }
   useEffect(() => {
     dispatch(getPost({ postId }))
-    console.log('1st get ...... ')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => {
@@ -439,14 +436,15 @@ function EditPost() {
     setDepartPro(postDepartProvince)
     setCityList(cities.filter((city: { city: string, province: string }) => city.province === postDepartProvince))
     setFileType(postFileType)
-    console.log('2nd update >>>>>>>>')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post])
   // submit
   // file type
   const postFileType = useAppSelector(selectPostFileType)
   const [fileType, setFileType] = useState<FileType | null>(null)
-  const [loading, setLoading] = useState(false)
+  // update loading
+  const postUpdateLoading = useAppSelector(selectPostUpdateLoading)
+  // const [loading, setLoading] = useState(postUpdateLoading)
   const validationPost = () => {
     titleValidation || setTitleError(true)
     timeLengthValidation || setTimeLengthError(true)
@@ -471,16 +469,14 @@ function EditPost() {
     departCity: departCity,
     destinations: destinations
   }
-  const postUpdateLoading = useAppSelector(selectPostUpdateLoading)
-  const postUpdateError = useAppSelector(selectPostUpdateError)
   const handleSubmit = () => {
-    console.log('updating Post: ', updatingPost)
-    setLoading(true)
     switch (fileType) {
       case 'offline': dispatch(updatePost({ postId, updatingPost })); break;
       case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
     }
   }
+  // update error
+  const postUpdateError = useAppSelector(selectPostUpdateError)
   const handleDelete = () => {
     const deletePost = async () => {
       try {
@@ -501,9 +497,9 @@ return (
       <h2 className="text-2xl font-bold">Edit</h2>
       {/* main content */}
       {
-        getPostLoading
+        getPostLoading || postUpdateLoading
           ? <div>Loading</div>
-          : getPostError !== null
+          : getPostError !== null || postUpdateError !== null
             ? <div> Loading error: {getPostError} </div>
             : <div className="max-w-3xl">
             <div className='mt-8 pt-2 sticky top-0 bg-white'>

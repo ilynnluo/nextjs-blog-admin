@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '../redux/store'
-import { DestinationProp, FileType, PostProp } from '../posts/create/page'
+import { PostProp } from '../posts/create/page'
 import axios from 'axios'
 
 export interface PostState {
