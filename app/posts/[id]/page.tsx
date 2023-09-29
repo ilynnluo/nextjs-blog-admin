@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostLength, selectPostTimeUnit, selectPostTags, selectPostAreaTagsArray, selectPostAreaTags,
+  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostLength, selectPostTimeUnit, selectPostTags, selectPostAreaTags,
   selectPostDepartProvince, selectPostDestinations, selectPostFileType, selectPostUpdateLoading, selectPostUpdateError
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
@@ -95,19 +95,14 @@ function EditPost() {
   ]
   const [editorValue, setEditorValue] = useState('');
   const dispatch = useAppDispatch()
-  useEffect(() => {
-    dispatch(getPost({ postId }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  
   const post = useAppSelector(selectPost)
-  const postAreaTags = useAppSelector(selectPostTags)
-  const postAreaTagsArray = useAppSelector(selectPostAreaTagsArray)
-  // const postAreaTagsMemo = selectPostAreaTags(post)
   const getPostLoading = useAppSelector(selectGetPostLoading)
   const getPostError = useAppSelector(selectGetPostError)
   const params = useParams()
   const postId = params.id as string
   const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
+  // title
   const postTitle = useAppSelector(selectPostTitle)
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState<null | boolean>(false)
@@ -117,6 +112,7 @@ function EditPost() {
     setTitleValidation(e.target.validity.valid)
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
   }
+  // length
   const postLength =  useAppSelector(selectPostLength)
   const [length, setLength] = useState('')
   const [timeLengthError, setTimeLengthError] = useState(false)
@@ -126,9 +122,9 @@ function EditPost() {
     setTimeLengthValidation(v => v = e.target.validity.valid)
     e.target.validity.valid ? setTimeLengthError(false) : setTimeLengthError(true)
   }
+  // unit
   const postTimeUnit = useAppSelector(selectPostTimeUnit)
-  const [timeUnit, setTimeUnit] = useState('')
-  const [timeUnitArray, setTimeArray] = useState(defaultTimeUnits)
+  const [timeUnit, setTimeUnit] = useState(postTimeUnit)
   const [timeUnitError, setTimeUnitError] = useState(false)
   const [timeUnitValidation, setTimeUnitValidation] = useState(true)
   const handleTimeUnit = (e: ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +132,10 @@ function EditPost() {
     setTimeUnitValidation(e.target.validity.valid)
     e.target.validity.valid ? setTimeUnitError(false) : setTimeUnitError(true)
   }
-  const [areaTags, setAreaTags] = useState(postAreaTagsArray)
+  // area tags
+  const postAreaTags = useAppSelector(selectPostTags)
+  const postAreaTagsMemoied = useAppSelector(selectPostAreaTags)
+  const [areaTags, setAreaTags] = useState(postAreaTagsMemoied)
   const [checkedTags, setCheckedTags] = useState<string[]>(postAreaTags)
   const [areaTagError, setAreaTagError] = useState<boolean | null>(null)
   const [areaTagValidation, setAreaTagValidation] = useState(true)
@@ -157,8 +156,11 @@ function EditPost() {
     setAreaTagValidation(isCheced)
     isCheced ? setAreaTagError(false) : setAreaTagError(true)
   }
+  // depart province
   const postDepartProvince = useAppSelector(selectPostDepartProvince)
-  const [departPro, setDepartPro] = useState('')
+  console.log('postDepartProvince: ', postDepartProvince)
+  const [departPro, setDepartPro] = useState(postDepartProvince)
+  console.log('departPro: ', departPro)
   const [departProvinceValidation, setDepartProvinceValidation] = useState(true)
   const [departProError, setDepartProError] = useState<boolean | null>(null)
   const [cityList, setCityList] = useState<CityProp[] | undefined>([])
@@ -405,10 +407,8 @@ function EditPost() {
       copyUpdatingDest.spotCity = updateDestCity
       copyUpdatingDest.spotFeatures = checkedUpdateFeatures
       copyUpdatingDest.spotActivities = checkedUpdateActivities
-      console.log('copyUpdatingDest: ', copyUpdatingDest)
       copyDestinations.splice(getIndex(), 0, copyUpdatingDest)
       copyDestinations.splice(getIndex()+1, 1)
-      console.log('copyDestinations: ', copyDestinations)
       setDestinations(copyDestinations)
       handleCloseUpdateDestination()
     }
@@ -425,18 +425,26 @@ function EditPost() {
       case 'published': setFileType(FileType.published); break;
     }
   }
-  // submit
-  const [createResult, setCreateResult] = useState(false)
-  const postFileType = useAppSelector(selectPostFileType)
+  useEffect(() => {
+    dispatch(getPost({ postId }))
+    console.log('1st get ...... ')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   useEffect(() => {
     setTitle(postTitle)
     setLength(postLength)
     setTimeUnit(postTimeUnit)
-    setAreaTags(postAreaTagsArray)
+    setAreaTags(postAreaTagsMemoied)
+    setCheckedTags(postAreaTags)
+    setDepartPro(postDepartProvince)
     setCityList(cities.filter((city: { city: string, province: string }) => city.province === postDepartProvince))
     setFileType(postFileType)
+    console.log('2nd update >>>>>>>>')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postTitle, postLength, postTimeUnit, postAreaTagsArray, postDepartProvince, postFileType])
+  }, [post])
+  // submit
+  // file type
+  const postFileType = useAppSelector(selectPostFileType)
   const [fileType, setFileType] = useState<FileType | null>(null)
   const [loading, setLoading] = useState(false)
   const validationPost = () => {
@@ -465,17 +473,6 @@ function EditPost() {
   }
   const postUpdateLoading = useAppSelector(selectPostUpdateLoading)
   const postUpdateError = useAppSelector(selectPostUpdateError)
-  // const updatePost = async () => {
-  //   try {
-  //     const response = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
-  //     if (response.status === 200) {
-  //       setCreateResult(true)
-  //     }
-  //   } catch (e: any) {
-  //     console.log('post api error: ', e.message)
-  //   }
-  // }
-
   const handleSubmit = () => {
     console.log('updating Post: ', updatingPost)
     setLoading(true)
@@ -582,11 +579,11 @@ return (
                           <div className="flex mt-2">
                             <div className="mr-8">
                               {
-                                timeUnitArray.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
+                                defaultTimeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
                                   <input
                                     type="radio"
                                     value={t.value}
-                                    checked={t.value === timeUnit}
+                                    checked={t.value == postTimeUnit}
                                     onChange={handleTimeUnit}
                                     required
                                     className="form-radio"

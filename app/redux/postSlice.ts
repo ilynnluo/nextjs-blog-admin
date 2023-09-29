@@ -50,7 +50,6 @@ export const updatePost = createAsyncThunk('post/updatePost', async (params: { p
   const postId = params.postId
   const updatingPost = params.updatingPost
   const { data: response } = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
-  console.log('redux update response: ', response)
   return response
 })
 
@@ -91,18 +90,6 @@ export const selectPostTitle = (state: RootState) => state.post.post.title
 export const selectPostLength = (state: RootState) => state.post.post.length
 export const selectPostTimeUnit = (state: RootState) => state.post.post.unit
 export const selectPostTags = (state: RootState) => state.post.post.areaTags
-export const selectPostAreaTagsArray = (state: RootState) => {
-  const getCheckedAreaTags = defaultTags.map(t => {
-    if (state.post.post.areaTags.find((c: string) => c === t.name)) {
-      return {
-        ...t,
-        checked: true
-      }
-    }
-    return t
-  })
-  return getCheckedAreaTags
-}
 export const selectPostAreaTags = createSelector([selectPostTags], (areaTags) => {
   const getCheckedAreaTags = defaultTags.map(t => {
     if (areaTags.find((c: string) => c === t.name)) {
@@ -115,7 +102,6 @@ export const selectPostAreaTags = createSelector([selectPostTags], (areaTags) =>
   })
   return getCheckedAreaTags
 })
-// const selectPostAreaTagsMemo = selectPostAreaTags(state)
 export const selectPostDepartProvince = (state: RootState) => state.post.post.departProvince
 export const selectPostDestinations = (state: RootState) => state.post.post.destinations
 export const selectPostFileType = (state: RootState) => state.post.post.fileType
