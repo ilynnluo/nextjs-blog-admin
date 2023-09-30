@@ -94,11 +94,12 @@ function EditPost() {
   ]
   const [editorValue, setEditorValue] = useState('');
   const dispatch = useAppDispatch()
+  const params = useParams()
+  const postId = params.id as string
+  const router = useRouter()
   const post = useAppSelector(selectPost)
   const postLoading = useAppSelector(selectGetPostLoading)
   const postError = useAppSelector(selectGetPostError)
-  const params = useParams()
-  const postId = params.id as string
   // title
   const postTitle = useAppSelector(selectPostTitle)
   const [title, setTitle] = useState('')
@@ -279,7 +280,6 @@ function EditPost() {
     setDestinationValidation(isChecked)
     isChecked && setDestinationError(false)
   }
-
   // update destination state management
   const [showUpdateDest, setShowUpdateDest] = useState(false)
   const handleShowUpdateDestination = (e: MouseEvent<HTMLButtonElement>, id: string) => {
@@ -421,6 +421,50 @@ function EditPost() {
       case 'published': setFileType(FileType.published); break;
     }
   }
+  // delete
+  const [showDelConfirm, setShowDelConfirm] = useState(false)
+  const handleDelete = () => setShowDelConfirm(true)
+  // const handleConfirmDel = () => {
+  //   dispatch(deletePost({ postId }))
+  //   setShowDelConfirm(false)
+  //   // why this line doesn't work? redirect('http://localhost:3001/posts')
+  //   router.push('http://localhost:3001/posts')
+  // }
+  const handleCancelDel = () => setShowDelConfirm(false)
+  // file type
+  const postFileType = useAppSelector(selectPostFileType)
+  const [fileType, setFileType] = useState<FileType | null>(null)
+  // submit
+  const updatingPost: PostProp = {
+    id: postId,
+    fileType: fileType,
+    title: title,
+    length: length,
+    unit: timeUnit,
+    areaTags: checkedTags,
+    departProvince: departPro,
+    departCity: departCity,
+    destinations: destinations
+  }
+  const validationPost = () => {
+    titleValidation || setTitleError(true)
+    timeLengthValidation || setTimeLengthError(true)
+    timeUnitValidation || setTimeUnitError(true)
+    areaTagValidation || setAreaTagError(true)
+    departProvinceValidation || setDepartProError(true)
+    destinationValidation || setDestinationError(true)
+    const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
+    if (validation.every(v => v === true)) {
+      return true
+    }
+    return false
+  }
+  const handleSubmit = () => {
+    switch (fileType) {
+      case 'offline': dispatch(updatePost({ postId, updatingPost })); break;
+      case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
+    }
+  }
   useEffect(() => {
     dispatch(getPost({ postId }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -436,46 +480,6 @@ function EditPost() {
     setFileType(postFileType)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post])
-  // submit
-  // file type
-  const postFileType = useAppSelector(selectPostFileType)
-  const [fileType, setFileType] = useState<FileType | null>(null)
-  const validationPost = () => {
-    titleValidation || setTitleError(true)
-    timeLengthValidation || setTimeLengthError(true)
-    timeUnitValidation || setTimeUnitError(true)
-    areaTagValidation || setAreaTagError(true)
-    departProvinceValidation || setDepartProError(true)
-    destinationValidation || setDestinationError(true)
-    const validation = [titleValidation, timeLengthValidation, timeUnitValidation, areaTagValidation, departProvinceValidation, destinationValidation]
-    if (validation.every(v => v === true)) {
-      return true
-    }
-    return false
-  }
-  const updatingPost: PostProp = {
-    id: postId,
-    fileType: fileType,
-    title: title,
-    length: length,
-    unit: timeUnit,
-    areaTags: checkedTags,
-    departProvince: departPro,
-    departCity: departCity,
-    destinations: destinations
-  }
-  const handleSubmit = () => {
-    switch (fileType) {
-      case 'offline': dispatch(updatePost({ postId, updatingPost })); break;
-      case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
-    }
-  }
-  const router = useRouter()
-  const handleDelete = () => {
-    dispatch(deletePost({ postId }))
-    // why this line doesn't work? redirect('http://localhost:3001/posts')
-    router.push('http://localhost:3001/posts')
-  }
 
 return (
   <MainLayout>
@@ -753,6 +757,9 @@ return (
                   onClick={handleDelete}>
                   Delete
                 </button>
+                {
+                  showDelConfirm && <div> Deleting </div>
+                }
                 <div>
                   {
                     postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
