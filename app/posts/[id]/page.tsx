@@ -1,6 +1,6 @@
 'use client'
 import React, { ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'react';
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import MainLayout from "@/app/layout/layout"
@@ -9,11 +9,10 @@ import CreateDestination from '@/app/components/createDestination/page';
 import UpdateDestination from '@/app/components/updateDestination/page';
 import { CityProp, FileType, DestinationProp, PostProp } from '../create/page';
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/app/hooks/hooks';
 import {
-  getPost, updatePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostLength, selectPostTimeUnit, selectPostTags, selectPostAreaTags,
-  selectPostDepartProvince, selectPostDestinations, selectPostFileType, selectPostUpdateLoading, selectPostUpdateError
+  getPost, updatePost, deletePost, selectPost, selectGetPostLoading, selectGetPostError, selectPostTitle, selectPostLength, selectPostTimeUnit, selectPostTags, selectPostAreaTags,
+  selectPostDepartProvince, selectPostDestinations, selectPostFileType
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
 import {store} from '../../redux/store'
@@ -95,13 +94,11 @@ function EditPost() {
   ]
   const [editorValue, setEditorValue] = useState('');
   const dispatch = useAppDispatch()
-  
   const post = useAppSelector(selectPost)
-  const getPostLoading = useAppSelector(selectGetPostLoading)
-  const getPostError = useAppSelector(selectGetPostError)
+  const postLoading = useAppSelector(selectGetPostLoading)
+  const postError = useAppSelector(selectGetPostError)
   const params = useParams()
   const postId = params.id as string
-  const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   // title
   const postTitle = useAppSelector(selectPostTitle)
   const [title, setTitle] = useState('')
@@ -211,6 +208,7 @@ function EditPost() {
     e.target.validity.valid ? setCreateDestProError(false) : setCreateDestProError(true)
   }
   const handleCreateDestCity = (e: ChangeEvent<HTMLSelectElement>) => setCreateDestCity(e.currentTarget.value)
+  const [checkedUpdateFeatures, setCheckedUpdateFeatures] = useState<string[]>([])
   const [createFeatures, setCreateFeatures] = useState(defaultFeatures)
   const [checkedCreateFeatures, setCheckedCreateFeatures] = useState<string[]>([])
   const [createFeaturesError, setCreateFeaturesError] = useState<boolean | null>(null)
@@ -442,9 +440,6 @@ function EditPost() {
   // file type
   const postFileType = useAppSelector(selectPostFileType)
   const [fileType, setFileType] = useState<FileType | null>(null)
-  // update loading
-  const postUpdateLoading = useAppSelector(selectPostUpdateLoading)
-  // const [loading, setLoading] = useState(postUpdateLoading)
   const validationPost = () => {
     titleValidation || setTitleError(true)
     timeLengthValidation || setTimeLengthError(true)
@@ -475,20 +470,12 @@ function EditPost() {
       case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
     }
   }
-  // update error
-  const postUpdateError = useAppSelector(selectPostUpdateError)
+  const router = useRouter()
   const handleDelete = () => {
-    const deletePost = async () => {
-      try {
-        const response = await axios.delete(`http://localhost: 3000/posts/${postId}`)
-        console.log('delete response: ', response)
-      } catch (e: any) {
-        console.log('delete error: ', e.message)
-      }
-    }
-    deletePost()
+    dispatch(deletePost({ postId }))
+    // why this line doesn't work? redirect('http://localhost:3001/posts')
+    router.push('http://localhost:3001/posts')
   }
-  
 
 return (
   <MainLayout>
@@ -497,10 +484,10 @@ return (
       <h2 className="text-2xl font-bold">Edit</h2>
       {/* main content */}
       {
-        getPostLoading || postUpdateLoading
+        postLoading
           ? <div>Loading</div>
-          : getPostError !== null || postUpdateError !== null
-            ? <div> Loading error: {getPostError} </div>
+          : postError !== null
+            ? <div> Loading error: {postError} </div>
             : <div className="max-w-3xl">
             <div className='mt-8 pt-2 sticky top-0 bg-white'>
               <button

@@ -7,8 +7,6 @@ export interface PostState {
   post: PostProp
   loading: boolean
   error: any
-  updateLoading: boolean
-  updateError: any
 }
 const initialState: PostState = {
   post: {
@@ -23,9 +21,7 @@ const initialState: PostState = {
     destinations: []
   },
   loading: true,
-  error: null,
-  updateLoading: false,
-  updateError: null
+  error: null
 }
 const defaultTags = [
   {
@@ -40,7 +36,6 @@ const defaultTags = [
   }
 ]
 export const getPost = createAsyncThunk('post/getPost', async (params: { postId: string }) => {
-  // why don't use try() catch()
   const postId = params.postId
   const { data: response } = await axios.get(`http://localhost:3000/posts/${postId}`)
   return response
@@ -50,6 +45,14 @@ export const updatePost = createAsyncThunk('post/updatePost', async (params: { p
   const postId = params.postId
   const updatingPost = params.updatingPost
   const { data: response } = await axios.put(`http://localhost:3000/posts/${postId}`, updatingPost)
+  return response
+})
+
+export const deletePost = createAsyncThunk('post/deletePost', async (params: { postId: string }) => {
+  const postId = params.postId
+  console.log('deleting postId in redux: ', postId)
+  const { data: response } = await axios.delete(`http://localhost:3000/posts/${postId}`)
+  console.log('delete in redux: ', response)
   return response
 })
 
@@ -71,14 +74,24 @@ export const postSlice = createSlice({
         state.error = action.error.message
       })
       .addCase(updatePost.pending, (state) => {
-        state.updateLoading = true
+        state.loading = true
       })
       .addCase(updatePost.fulfilled, (state) => {
-        state.updateLoading = false
+        state.loading = false
       })
       .addCase(updatePost.rejected, (state, action) => {
-        state.updateLoading = false
-        state.updateError = action.error.message
+        state.loading = false
+        state.error = action.error.message
+      })
+      .addCase(deletePost.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(deletePost.fulfilled, (state) => {
+        state.loading = false
+      })
+      .addCase(deletePost.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message
       })
   }
 })
@@ -105,7 +118,5 @@ export const selectPostAreaTags = createSelector([selectPostTags], (areaTags) =>
 export const selectPostDepartProvince = (state: RootState) => state.post.post.departProvince
 export const selectPostDestinations = (state: RootState) => state.post.post.destinations
 export const selectPostFileType = (state: RootState) => state.post.post.fileType
-export const selectPostUpdateLoading = (state: RootState) => state.post.updateLoading
-export const selectPostUpdateError = (state: RootState) => state.post.updateError
 
 export default postSlice.reducer

@@ -48,10 +48,7 @@ export default function PostList() {
       console.log(error)
     }
   }
-  useEffect(() => {
-    getPostTitle()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  useEffect(() => { getPostTitle() })
   return (
     <MainLayout>
       <ul>
