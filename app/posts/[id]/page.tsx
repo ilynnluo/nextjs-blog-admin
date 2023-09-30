@@ -424,12 +424,12 @@ function EditPost() {
   // delete
   const [showDelConfirm, setShowDelConfirm] = useState(false)
   const handleDelete = () => setShowDelConfirm(true)
-  // const handleConfirmDel = () => {
-  //   dispatch(deletePost({ postId }))
-  //   setShowDelConfirm(false)
-  //   // why this line doesn't work? redirect('http://localhost:3001/posts')
-  //   router.push('http://localhost:3001/posts')
-  // }
+  const handleConfirmDel = () => {
+    dispatch(deletePost({ postId }))
+    setShowDelConfirm(false)
+    // why this line doesn't work? redirect('http://localhost:3001/posts')
+    router.push('http://localhost:3001/posts')
+  }
   const handleCancelDel = () => setShowDelConfirm(false)
   // file type
   const postFileType = useAppSelector(selectPostFileType)
@@ -631,9 +631,7 @@ return (
                         defaultProvince={postDepartProvince}
                         defaultCity={departCity}
                         provinceList={regions}
-                        // province={departPro}
                         cityList={cityList}
-                        // city={departCity}
                         handleProvince={handleDepartProvince}
                         handleCity={handleCity}
                       />
@@ -758,7 +756,25 @@ return (
                   Delete
                 </button>
                 {
-                  showDelConfirm && <div> Deleting </div>
+                  showDelConfirm && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
+                  <div className="p-8 rounded bg-white w-80 h-40">
+                    <span>
+                      Comfirm to delete?
+                    </span>
+                    <div className="flex mt-8 justify-between">
+                      <button className="rounded py-2 px-4 h-10 bg-red-600" onClick={handleConfirmDel}>
+                        <span className="text-white">
+                          Delete
+                        </span>
+                      </button>
+                      <button className="rounded py-2 px-4 h-10 border border-slate-500 bg-white" onClick={handleCancelDel}>
+                        <span className="text-slate-700">
+                          Cancel
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 }
                 <div>
                   {
