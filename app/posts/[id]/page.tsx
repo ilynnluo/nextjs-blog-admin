@@ -15,7 +15,7 @@ import {
   selectPostDepartProvince, selectPostDestinations, selectPostFileType
 } from '../../redux/postSlice'
 import { Provider } from 'react-redux';
-import {store} from '../../redux/store'
+import { store } from '../../redux/store'
 
 var canada = require('canada')
 
@@ -67,6 +67,51 @@ const postStates = [
     value: 'published'
   }
 ]
+const DelConfirmDialog = () => {
+  const dispatch = useAppDispatch()
+  const params = useParams()
+  const postId = params.id as string
+  const router = useRouter()
+  const [showDelConfirm, setShowDelConfirm] = useState(false)
+  const handleDelete = () => setShowDelConfirm(true)
+  const handleConfirmDel = () => {
+    dispatch(deletePost({ postId }))
+    setShowDelConfirm(false)
+    // why this line doesn't work? redirect('http://localhost:3001/posts')
+    router.push('http://localhost:3001/posts')
+  }
+  const handleCancelDel = () => setShowDelConfirm(false)
+  return (
+    <div>
+      <button
+        className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
+        onClick={handleDelete}>
+        Delete
+      </button>
+      {
+        showDelConfirm && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
+          <div className="p-8 rounded bg-white w-80 h-40">
+            <span>
+              Comfirm to delete?
+            </span>
+            <div className="flex mt-8 justify-between">
+              <button className="rounded py-2 px-4 h-10 bg-red-600" onClick={handleConfirmDel}>
+                <span className="text-white">
+                  Delete
+                </span>
+              </button>
+              <button className="rounded py-2 px-4 h-10 border border-slate-500 bg-white" onClick={handleCancelDel}>
+                <span className="text-slate-700">
+                  Cancel
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  )
+}
 function EditPost() {
   const regionsData = canada.regions
   const regions = Object.keys(regionsData) as string[]
@@ -96,7 +141,6 @@ function EditPost() {
   const dispatch = useAppDispatch()
   const params = useParams()
   const postId = params.id as string
-  const router = useRouter()
   const post = useAppSelector(selectPost)
   const postLoading = useAppSelector(selectGetPostLoading)
   const postError = useAppSelector(selectGetPostError)
@@ -111,7 +155,7 @@ function EditPost() {
     e.target.validity.valid ? setTitleError(false) : setTitleError(true)
   }
   // length
-  const postLength =  useAppSelector(selectPostLength)
+  const postLength = useAppSelector(selectPostLength)
   const [length, setLength] = useState('')
   const [timeLengthError, setTimeLengthError] = useState(false)
   const [timeLengthValidation, setTimeLengthValidation] = useState(true)
@@ -396,7 +440,7 @@ function EditPost() {
     const copyDestinations = [...destinations]
     const updatingDest = copyDestinations.find((d) => d.id === id) as DestinationProp
     const getIndex = () => copyDestinations.findIndex((d) => d.id === id)
-    const copyUpdatingDest = {...updatingDest}
+    const copyUpdatingDest = { ...updatingDest }
     if (destStatesValidations.every(d => d === true) && copyUpdatingDest !== undefined) {
       copyUpdatingDest.spotName = updateSpotName
       copyUpdatingDest.spotProvince = updateDestPro
@@ -404,7 +448,7 @@ function EditPost() {
       copyUpdatingDest.spotFeatures = checkedUpdateFeatures
       copyUpdatingDest.spotActivities = checkedUpdateActivities
       copyDestinations.splice(getIndex(), 0, copyUpdatingDest)
-      copyDestinations.splice(getIndex()+1, 1)
+      copyDestinations.splice(getIndex() + 1, 1)
       setDestinations(copyDestinations)
       handleCloseUpdateDestination()
     }
@@ -422,15 +466,7 @@ function EditPost() {
     }
   }
   // delete
-  const [showDelConfirm, setShowDelConfirm] = useState(false)
-  const handleDelete = () => setShowDelConfirm(true)
-  const handleConfirmDel = () => {
-    dispatch(deletePost({ postId }))
-    setShowDelConfirm(false)
-    // why this line doesn't work? redirect('http://localhost:3001/posts')
-    router.push('http://localhost:3001/posts')
-  }
-  const handleCancelDel = () => setShowDelConfirm(false)
+
   // file type
   const postFileType = useAppSelector(selectPostFileType)
   const [fileType, setFileType] = useState<FileType | null>(null)
@@ -465,10 +501,12 @@ function EditPost() {
       case 'published': validationPost() && dispatch(updatePost({ postId, updatingPost })); break;
     }
   }
+  // 1. get the whole post
   useEffect(() => {
     dispatch(getPost({ postId }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  // 2. update state from store
   useEffect(() => {
     setTitle(postTitle)
     setLength(postLength)
@@ -480,329 +518,305 @@ function EditPost() {
     setFileType(postFileType)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post])
+  console.log('done ... ')
 
-return (
-  <MainLayout>
-    <div>
-      {/* page title */}
-      <h2 className="text-2xl font-bold">Edit</h2>
-      {/* main content */}
-      {
-        postLoading
-          ? <div>Loading</div>
-          : postError !== null
-            ? <div> Loading error: {postError} </div>
-            : <div className="max-w-3xl">
-            <div className='mt-8 pt-2 sticky top-0 bg-white'>
-              <button
-                ref={defaultTab}
-                value='basic'
-                onClick={handleTab}
-                className='pb-2 border-b-4 border-white  focus:border-emerald-500 focus-visible:border-white'>
-                Basic Info</button>
-              <button
-                value='main'
-                onClick={handleTab}
-                className='ml-8 pb-2 border-b-4 border-white  focus:border-emerald-500'>
-                Main Content</button>
-            </div>
-            <div className="grid grid-cols-1">
-              {/* basic Tab */}
-              {
-                tab === 'basic' && <div>
-                  {/* Create page title */}
-                  <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
-                    General
-                  </div>
-                  {/* General */}
-                  <div className='pl-4'>
-                    {/* input title */}
-                    <label className="block mt-8">
-                      <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                        Title</span>
-                      <input
-                        type="text"
-                        defaultValue={post?.title}
-                        onChange={handleTitle}
-                        required
-                        minLength={3}
-                        maxLength={100}
-                        className="block mt-1 p-1 w-full border border-slate-300 
+  return (
+    <MainLayout>
+      <div>
+        {/* page title */}
+        <h2 className="text-2xl font-bold">Edit</h2>
+        {/* main content */}
+        {
+          postLoading
+            ? <div>Loading</div>
+            : postError !== null
+              ? <div> Loading error: {postError} </div>
+              : <div className="max-w-3xl">
+                <div className='mt-8 pt-2 sticky top-0 bg-white'>
+                  <button
+                    ref={defaultTab}
+                    value='basic'
+                    onClick={handleTab}
+                    className='pb-2 border-b-4 border-white  focus:border-emerald-500 focus-visible:border-white'>
+                    Basic Info</button>
+                  <button
+                    value='main'
+                    onClick={handleTab}
+                    className='ml-8 pb-2 border-b-4 border-white  focus:border-emerald-500'>
+                    Main Content</button>
+                </div>
+                <div className="grid grid-cols-1">
+                  {/* basic Tab */}
+                  {
+                    tab === 'basic' && <div>
+                      {/* Create page title */}
+                      <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
+                        General
+                      </div>
+                      {/* General */}
+                      <div className='pl-4'>
+                        {/* input title */}
+                        <label className="block mt-8">
+                          <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                            Title</span>
+                          <input
+                            type="text"
+                            defaultValue={post?.title}
+                            onChange={handleTitle}
+                            required
+                            minLength={3}
+                            maxLength={100}
+                            className="block mt-1 p-1 w-full border border-slate-300 
                         focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           placeholder:text-sm placeholder:text-slate-300
                         focus:invalid:border-pink-500 focus:invalid:ring-pink-100"
-                        placeholder="place, features, group of target users will be good keywords"
-                      />
-                      {
-                        titleError === null
-                          ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
-                          : titleError
-                            ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
-                            : <div className="block h-6" />
-                      }
-                    </label>
-                    {/* how long spend */}
-                    <div className="mt-8">
-                      <div className="flex">
-                        <label className="block">
-                          <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                            Length</span>
-                          <input
-                            type="number"
-                            defaultValue={post?.length}
-                            onChange={handleLength}
-                            required
-                            max={1000}
-                            className="form-input mt-1 p-1 w-48 block border border-slate-300
+                            placeholder="place, features, group of target users will be good keywords"
+                          />
+                          {
+                            titleError === null
+                              ? <span className='text-xs text-slate-500'>Please input at lease 3 and no more than 100 charactors</span>
+                              : titleError
+                                ? <span className='text-xs text-pink-500'>Please input at lease 3 and no more than 100 charactors</span>
+                                : <div className="block h-6" />
+                          }
+                        </label>
+                        {/* how long spend */}
+                        <div className="mt-8">
+                          <div className="flex">
+                            <label className="block">
+                              <span className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Length</span>
+                              <input
+                                type="number"
+                                defaultValue={post?.length}
+                                onChange={handleLength}
+                                required
+                                max={1000}
+                                className="form-input mt-1 p-1 w-48 block border border-slate-300
                           focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50
                           focus:invalid:border-pink-500 focus:invalid:ring-pink-100
                             placeholder:text-sm placeholder:text-slate-300"
-                            placeholder="number only"
-                          />
-                        </label>
-                        <fieldset className="block ml-8">
-                          <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                            Unit</legend>
-                          <div className="flex mt-2">
-                            <div className="mr-8">
+                                placeholder="number only"
+                              />
+                            </label>
+                            <fieldset className="block ml-8">
+                              <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                                Unit</legend>
+                              <div className="flex mt-2">
+                                <div className="mr-8">
+                                  {
+                                    defaultTimeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
+                                      <input
+                                        type="radio"
+                                        value={t.value}
+                                        checked={t.value == postTimeUnit}
+                                        onChange={handleTimeUnit}
+                                        required
+                                        className="form-radio"
+                                        name="radio-direct" />
+                                      <span className="ml-2 mr-8">{t.name}</span>
+                                    </label>)
+                                  }
+                                </div>
+                              </div>
+                            </fieldset>
+                          </div>
+                          {
+                            (timeLengthError === false && timeUnitError === false)
+                              ? <div className="block h-6" />
+                              : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
+                          }
+                        </div>
+                        {/* general area tags */}
+                        <div className="mt-8">
+                          <fieldset className="block">
+                            <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
+                              Area Tags</legend>
+                            <div className="flex mt-1">
                               {
-                                defaultTimeUnits.map((t) => <label key={`${t.id}+${t.value}`} className="inline-flex items-center">
-                                  <input
-                                    type="radio"
-                                    value={t.value}
-                                    checked={t.value == postTimeUnit}
-                                    onChange={handleTimeUnit}
-                                    required
-                                    className="form-radio"
-                                    name="radio-direct" />
-                                  <span className="ml-2 mr-8">{t.name}</span>
-                                </label>)
+                                areaTags.map((t) => <div key={t.name} className="mr-8">
+                                  <label className="inline-flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      value={t.name}
+                                      checked={t.checked}
+                                      onChange={e => handleAreaTag(e, t.id)}
+                                      required
+                                      className="form-checkbox" />
+                                    <span className="ml-2">
+                                      {t.name}
+                                    </span>
+                                  </label>
+                                </div>)
                               }
                             </div>
-                          </div>
-                        </fieldset>
+                            {
+                              areaTagError === null
+                                ? <div className="block h-6" />
+                                : areaTagError
+                                  ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
+                                  : <div className="block h-6" />
+                            }
+                          </fieldset>
+                        </div>
                       </div>
-                      {
-                        (timeLengthError === false && timeUnitError === false)
-                          ? <div className="block h-6" />
-                          : <span className='text-xs text-pink-500'>Please input a number, less than 1000, and select a unit</span>
-                      }
-                    </div>
-                    {/* general area tags */}
-                    <div className="mt-8">
-                      <fieldset className="block">
-                        <legend className="text-gray-700 after:content-['*'] after:ml-0.5 after:text-red-500">
-                          Area Tags</legend>
-                        <div className="flex mt-1">
+                      {/* Departure */}
+                      <div>
+                        <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
+                          Departure
+                        </div>
+                        <div className="mt-8 pl-4">
+                          <ProvinceCity
+                            defaultProvince={postDepartProvince}
+                            defaultCity={departCity}
+                            provinceList={regions}
+                            cityList={cityList}
+                            handleProvince={handleDepartProvince}
+                            handleCity={handleCity}
+                          />
                           {
-                            areaTags.map((t) => <div key={t.name} className="mr-8">
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="checkbox"
-                                  value={t.name}
-                                  checked={t.checked}
-                                  onChange={e => handleAreaTag(e, t.id)}
-                                  required
-                                  className="form-checkbox" />
-                                <span className="ml-2">
-                                  {t.name}
-                                </span>
-                              </label>
+                            departProError
+                              ? <span className='text-xs text-pink-500'>Please select a Province</span>
+                              : <div className="block h-6" />
+                          }
+                        </div>
+                      </div>
+                      {/* Desitinations */}
+                      <div>
+                        <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
+                          Destinations
+                        </div>
+                        <div className='p-4'>
+                          {
+                            destinations?.map((d: DestinationProp, index: number) => <div
+                              key={`${index}+${d.spotName}`}
+                              className='flex justify-between mt-2 hover:text-indigo-500'>
+                              <div className='w-96 overflow-hidden'>
+                                <span>{d.spotName}</span>
+                              </div>
+                              <div>
+                                <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id)}>
+                                  <span className='text-indigo-500 text-xs'>more</span>
+                                </button>
+                              </div>
                             </div>)
                           }
                         </div>
-                        {
-                          areaTagError === null
-                            ? <div className="block h-6" />
-                            : areaTagError
-                              ? <span className='text-xs text-pink-500'>Please select at least 1 tag</span>
-                              : <div className="block h-6" />
-                        }
-                      </fieldset>
-                    </div>
-                  </div>
-                  {/* Departure */}
-                  <div>
-                    <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
-                      Departure
-                    </div>
-                    <div className="mt-8 pl-4">
-                      <ProvinceCity
-                        defaultProvince={postDepartProvince}
-                        defaultCity={departCity}
-                        provinceList={regions}
-                        cityList={cityList}
-                        handleProvince={handleDepartProvince}
-                        handleCity={handleCity}
-                      />
-                      {
-                        departProError
-                          ? <span className='text-xs text-pink-500'>Please select a Province</span>
-                          : <div className="block h-6" />
-                      }
-                    </div>
-                  </div>
-                  {/* Desitinations */}
-                  <div>
-                    <div className="mt-12 px-4 py-2 border-l-4 border-emerald-500">
-                      Destinations
-                    </div>
-                    <div className='p-4'>
-                      {
-                        destinations?.map((d: DestinationProp, index: number) => <div
-                          key={`${index}+${d.spotName}`}
-                          className='flex justify-between mt-2 hover:text-indigo-500'>
-                          <div className='w-96 overflow-hidden'>
-                            <span>{d.spotName}</span>
-                          </div>
+                        {/* add desitination button */}
+                        <div className="mt-4">
+                          <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
+                            Add Desitination
+                          </button>
                           <div>
-                            <button className='rounded border-indigo-500' onClick={e => handleShowUpdateDestination(e, d.id)}>
-                              <span className='text-indigo-500 text-xs'>more</span>
-                            </button>
+                            {
+                              destinationError
+                                ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
+                                : <div className="block h-6" />
+                            }
                           </div>
-                        </div>)
-                      }
-                    </div>
-                    {/* add desitination button */}
-                    <div className="mt-4">
-                      <button className="py-2 px-4 bg-indigo-500 text-white rounded" onClick={handleShowDestination}>
-                        Add Desitination
-                      </button>
-                      <div>
+                        </div>
+                        {/* add destination */}
                         {
-                          destinationError
-                            ? <span className='text-xs text-pink-500'>Please add at lease one destination</span>
-                            : <div className="block h-6" />
+                          showCreateDest && <CreateDestination
+                            handleCloseDestination={handleCloseDestination}
+                            createSpotId={createSpotId}
+                            createSpotName={createSpotName}
+                            createSpotNameError={createSpotNameError}
+                            handleCreateSpotName={handleCreateSpotName}
+                            createDestPro={createDestPro}
+                            createDestProError={createDestProError}
+                            handleCreateDestProvince={handleCreateDestProvince}
+                            createDestCity={createDestCity}
+                            handleCreateDestCity={handleCreateDestCity}
+                            createCityList={createCityList}
+                            createFeatures={createFeatures}
+                            createFeaturesError={createFeaturesError}
+                            handleCreateFeature={handleCreateFeature}
+                            createActivities={createActivities}
+                            createActivitiesError={createActivitiesError}
+                            handleCreateActivity={handleCreateActivity}
+                            handleCreateDestination={handleCreateDestination}
+                          />
+                        }
+                        {/* edit destination */}
+                        {
+                          showUpdateDest && <UpdateDestination
+                            handleCloseUpdateDestination={handleCloseUpdateDestination}
+                            updateSpotId={updateSpotId}
+                            updateSpotName={updateSpotName}
+                            updateSpotNameError={updateSpotNameError}
+                            handleUpdateSpotName={handleUpdateSpotName}
+                            updateDestPro={updateDestPro}
+                            updateDestProError={updateDestProError}
+                            handleUpdateDestProvince={handleUpdateDestProvince}
+                            updateDestCity={updateDestCity}
+                            handleUpdateDestCity={handleUpdateDestCity}
+                            updateCityList={updateCityList}
+                            updateFeatures={updateFeatures}
+                            updateFeaturesError={updateFeaturesError}
+                            handleUpdateFeature={handleUpdateFeature}
+                            updateActivities={updateActivities}
+                            updateActivitiesError={updateActivitiesError}
+                            handleUpdateActivity={handleUpdateActivity}
+                            handleUpdateDestination={handleUpdateDestination}
+                            handleDeleteDestination={handleDeleteDestination}
+                          />
                         }
                       </div>
                     </div>
-                    {/* add destination */}
-                    {
-                      showCreateDest && <CreateDestination
-                        handleCloseDestination={handleCloseDestination}
-                        createSpotId={createSpotId}
-                        createSpotName={createSpotName}
-                        createSpotNameError={createSpotNameError}
-                        handleCreateSpotName={handleCreateSpotName}
-                        createDestPro={createDestPro}
-                        createDestProError={createDestProError}
-                        handleCreateDestProvince={handleCreateDestProvince}
-                        createDestCity={createDestCity}
-                        handleCreateDestCity={handleCreateDestCity}
-                        createCityList={createCityList}
-                        createFeatures={createFeatures}
-                        createFeaturesError={createFeaturesError}
-                        handleCreateFeature={handleCreateFeature}
-                        createActivities={createActivities}
-                        createActivitiesError={createActivitiesError}
-                        handleCreateActivity={handleCreateActivity}
-                        handleCreateDestination={handleCreateDestination}
-                      />
-                    }
-                    {/* edit destination */}
-                    {
-                      showUpdateDest && <UpdateDestination
-                        handleCloseUpdateDestination={handleCloseUpdateDestination}
-                        updateSpotId={updateSpotId}
-                        updateSpotName={updateSpotName}
-                        updateSpotNameError={updateSpotNameError}
-                        handleUpdateSpotName={handleUpdateSpotName}
-                        updateDestPro={updateDestPro}
-                        updateDestProError={updateDestProError}
-                        handleUpdateDestProvince={handleUpdateDestProvince}
-                        updateDestCity={updateDestCity}
-                        handleUpdateDestCity={handleUpdateDestCity}
-                        updateCityList={updateCityList}
-                        updateFeatures={updateFeatures}
-                        updateFeaturesError={updateFeaturesError}
-                        handleUpdateFeature={handleUpdateFeature}
-                        updateActivities={updateActivities}
-                        updateActivitiesError={updateActivitiesError}
-                        handleUpdateActivity={handleUpdateActivity}
-                        handleUpdateDestination={handleUpdateDestination}
-                        handleDeleteDestination={handleDeleteDestination}
-                      />
-                    }
-                  </div>
-                </div>
-              }
-              {/* Main content Tab */}
-              {
-                tab === 'main' && <div>
-                  {/* Main content */}
-                  <div>
-                    <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
-                      Content
-                    </div>
-                    {/* editor */}
-                    <div className='mt-8 pb-8'>
-                      <ReactQuill
-                        className='mb-8 h-64'
-                        theme='snow'
-                        value={editorValue}
-                        onChange={setEditorValue}
-                        modules={QuillModules}
-                        formats={QuillFormats}
-                      />
-                    </div>
-                  </div>
-                </div>
-              }
-              {/* submit Button */}
-              <div className="flex justify-between mt-12">
-                <button
-                  className="py-2 px-4 bg-white text-red-500 rounded border border-red-500"
-                  onClick={handleDelete}>
-                  Delete
-                </button>
-                {
-                  showDelConfirm && <div className='flex justify-center items-center w-screen h-full bg-slate-400/50 z-10 fixed top-0 left-0'>
-                  <div className="p-8 rounded bg-white w-80 h-40">
-                    <span>
-                      Comfirm to delete?
-                    </span>
-                    <div className="flex mt-8 justify-between">
-                      <button className="rounded py-2 px-4 h-10 bg-red-600" onClick={handleConfirmDel}>
-                        <span className="text-white">
-                          Delete
-                        </span>
-                      </button>
-                      <button className="rounded py-2 px-4 h-10 border border-slate-500 bg-white" onClick={handleCancelDel}>
-                        <span className="text-slate-700">
-                          Cancel
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                }
-                <div>
-                  {
-                    postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        value={s.value}
-                        onChange={handlePostState}
-                        checked={s.value === fileType}
-                        required
-                        className="form-radio"
-                        name="radio-direct" />
-                      <span className="ml-2 mr-8">{s.name}</span>
-                    </label>)
                   }
-                  <button
-                    className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
-                    onClick={handleSubmit}>
-                    Submit
-                  </button>
+                  {/* Main content Tab */}
+                  {
+                    tab === 'main' && <div>
+                      {/* Main content */}
+                      <div>
+                        <div className="mt-8 px-4 py-2 border-l-4 border-emerald-500">
+                          Content
+                        </div>
+                        {/* editor */}
+                        <div className='mt-8 pb-8'>
+                          <ReactQuill
+                            className='mb-8 h-64'
+                            theme='snow'
+                            value={editorValue}
+                            onChange={setEditorValue}
+                            modules={QuillModules}
+                            formats={QuillFormats}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  {/* submit Button */}
+                  <div className="flex justify-between mt-12">
+                    <DelConfirmDialog />
+                    <div>
+                      {
+                        postStates.map((s) => <label key={`${s.id}+${s.value}`} className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            value={s.value}
+                            onChange={handlePostState}
+                            checked={s.value === fileType}
+                            required
+                            className="form-radio"
+                            name="radio-direct" />
+                          <span className="ml-2 mr-8">{s.name}</span>
+                        </label>)
+                      }
+                      <button
+                        className="ml-8 py-2 px-4 bg-emerald-500 text-white rounded"
+                        onClick={handleSubmit}>
+                        Submit
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-      }
-    </div>
-  </MainLayout>
-)
+        }
+      </div>
+    </MainLayout>
+  )
 }
 
 export default function EditPostProvider() {
