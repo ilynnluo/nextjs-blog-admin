@@ -3,58 +3,37 @@ import { useEffect, useState } from "react";
 import MainLayout from "../layout/layout";
 import axios from "axios";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { PostProp } from "./create/page";
 
-// export interface PostProp {
-//   "id": number
-//   "title": string
-//   "cover": string
-//   "introduction": string
-//   "length": number
-//   "unit": string
-//   "areaTags": string[]
-//   "departure": {
-//     "province": string
-//     "city": string
-//   },
-//   "desitinations": {
-//     "id": number
-//     "province": string
-//     "city": string
-//     "spots": {
-//       "id": number
-//       "name": string
-//     }[]
-//     "features": {
-//       "id": number
-//       "name": string
-//     }[]
-//     "activities": {
-//       "id": number
-//       "name": string
-//     }[]
-//   }[]
-// }
-
 export default function PostList() {
+  const path = usePathname()
   const [posts, setPosts] = useState<PostProp[]>([])
-  const getPostTitle = async () => {
+  let postList: PostProp[] | null
+  const getPosts = async () => {
     try {
       const { data: response } = await axios.get('http://localhost:3000/posts')
-      const publisedPosts = response.filter((p: PostProp) => p.fileType === 'published')
-      setPosts(publisedPosts)
+      setPosts(response)
       return posts
     } catch (error) {
       console.log(error)
     }
   }
-  useEffect(() => { getPostTitle() })
+  if(path === '/posts') {
+    postList = posts.filter((p: PostProp) => p.fileType === 'published')
+  }
+  if(path === '/posts/draft') {
+    postList = posts.filter((p: PostProp) => p.fileType === 'offline')
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { getPosts() }, [])
+  console.log(' loading list page ... ')
   return (
     <MainLayout>
       <ul>
         {
-          posts.length > 0
-            ? posts.map((post: PostProp) =>
+          postList.length > 0
+            ? postList.map((post: PostProp) =>
               <li key={post.id} className="p-4 w-4/5 text-slate-600 hover:bg-slate-100 hover:rounded-sm">
                 <Link href={`/posts/${post.id}`}>
                   <div className="flex justify-between">

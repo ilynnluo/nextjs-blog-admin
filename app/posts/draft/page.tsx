@@ -21,6 +21,7 @@ export default function DraftPostList() {
     getPostTitle()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  console.log(' loading draft list ..... ')
   return (
     <MainLayout>
       <ul>
